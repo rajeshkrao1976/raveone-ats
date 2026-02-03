@@ -3,158 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiregrow CRM | Odoo Compact Edition</title>
+    <title>Hiregrow CRM | Odoo Enterprise Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #334155; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; overflow: hidden; }
         :root { --odoo-purple: #714B67; --odoo-teal: #00A09D; --odoo-border: #e2e8f0; }
         
         .odoo-header { background-color: var(--odoo-purple); color: white; }
-        .btn-primary { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 600; font-size: 11px; border: none; cursor: pointer; }
+        .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
+        .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
-        /* Compact Table Styles */
-        .odoo-table thead { background-color: #f1f5f9; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
-        .odoo-table th { padding: 6px 10px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); white-space: nowrap; color: #64748b; }
-        .odoo-table td { padding: 6px 10px; font-size: 11px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; border-right: 1px solid #f8fafc; }
+        /* High-Density Reference Styled Table */
+        .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .odoo-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; }
+        .odoo-table td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
-        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
-        .spinner { border: 2px solid #f3f3f3; border-top: 2px solid var(--odoo-teal); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; }
+        /* UI Overlays */
+        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-purple); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
         .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.open { display: flex; }
-        .action-btn { padding: 0.25rem; border-radius: 0.25rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-        .action-btn:hover { background-color: #f1f5f9; transform: scale(1.1); }
+        
+        .action-btn { padding: 0.35rem; border-radius: 0.375rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .action-btn:hover { background-color: #f1f5f9; transform: scale(1.15); }
         
         .breadcrumb-item:hover { color: var(--odoo-teal); cursor: pointer; text-decoration: underline; }
-        .scrollbar-hide::-webkit-scrollbar { width: 4px; height: 4px; }
-        .scrollbar-hide::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
-    <header class="odoo-header h-10 flex items-center px-4 shrink-0 shadow-sm z-50">
-        <div class="flex items-center gap-4 h-full">
-            <div class="flex items-center gap-2">
-                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-6 w-6 rounded bg-white p-0.5" alt="Logo">
-                <span class="font-bold text-xs uppercase tracking-tight">Hiregrow CRM</span>
+    <!-- Global Loader -->
+    <div id="loader">
+        <div class="spinner mb-4"></div>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Raveone intelligence</p>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
+        <div class="flex items-center gap-6 h-full">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="resetNavigation()">
+                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5" alt="Logo">
+                <div class="flex flex-col leading-none">
+                    <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
+                    <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase">Consultants</span>
+                </div>
             </div>
-            <nav class="flex gap-3 h-full text-[10px] font-bold uppercase tracking-wider">
-                <button onclick="switchView('Job Board')" id="tab-jobs" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Job Board</button>
-                <button onclick="switchView('Sourced')" id="tab-sourced" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Sourced</button>
-                <button onclick="switchView('Candidates')" id="tab-candidates" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Candidates</button>
-                <button onclick="switchView('Interview Tracker')" id="tab-interviews" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Interviews</button>
-                <button onclick="switchView('Clients')" id="tab-clients" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Clients</button>
-                <button onclick="switchView('Dashboard and Billing')" id="tab-billing" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Billing</button>
+            <nav class="flex gap-4 h-full text-[10px] font-bold uppercase tracking-wider" id="mainNav">
+                <button onclick="switchTab('Job Board')" class="h-full px-1 opacity-70 hover:opacity-100 transition-all border-b-2 border-transparent">Job Board</button>
+                <button onclick="switchTab('Sourced')" class="h-full px-1 opacity-70 hover:opacity-100 transition-all border-b-2 border-transparent">Sourced</button>
+                <button onclick="switchTab('Candidates')" class="h-full px-1 opacity-70 hover:opacity-100 transition-all border-b-2 border-transparent">Candidates</button>
+                <button onclick="switchTab('Interview Tracker')" class="h-full px-1 opacity-70 hover:opacity-100 transition-all border-b-2 border-transparent">Interviews</button>
+                <button onclick="switchTab('Clients')" class="h-full px-1 opacity-70 hover:opacity-100 transition-all border-b-2 border-transparent">Clients</button>
+                <button onclick="switchTab('Dashboard and Billing')" class="h-full px-1 opacity-70 hover:opacity-100 transition-all border-b-2 border-transparent">Billing</button>
             </nav>
         </div>
         <div class="ml-auto flex items-center gap-3">
-            <button onclick="syncWebsiteForm()" class="text-[9px] font-bold bg-emerald-600 text-white px-2 py-1 rounded uppercase flex items-center gap-1 hover:bg-emerald-700 transition-all">
-                <i class="ph ph-arrows-clockwise"></i> Sync
+            <button onclick="syncWebsiteApplications()" class="text-[9px] font-bold bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1 hover:bg-emerald-700 shadow-md">
+                <i class="ph ph-arrows-clockwise"></i> Sync Website
             </button>
-            <button onclick="testConnection()" class="text-[9px] font-bold bg-white/10 px-2 py-1 rounded hover:bg-white/20">Test</button>
+            <div class="h-6 w-[1px] bg-white/20"></div>
+            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-all uppercase">Test API</button>
         </div>
     </header>
 
-    <div class="bg-white py-1 px-4 flex items-center justify-between border-b shrink-0 h-10">
+    <!-- Subheader: Breadcrumbs & Filters -->
+    <div class="bg-white py-2 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col">
-            <div id="breadcrumb" class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <span class="breadcrumb-item" onclick="resetDrillDown()">CRM</span> / <span id="currentTabName">Job Board</span>
+            <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <span class="breadcrumb-item" onclick="resetNavigation()">CRM</span> / <span id="currentPath">Job Board</span>
             </div>
-            <div class="flex items-center gap-2 mt-0.5">
-                <button onclick="refreshData()" class="btn-primary text-[10px] py-0.5 px-2">Refresh Sync</button>
-                <button id="backBtn" onclick="resetDrillDown()" class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200 text-[10px] py-0.5 px-2 hidden">Back to Main</button>
+            <div class="flex items-center gap-2 mt-1">
+                <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase tracking-tighter text-[10px]">Live Refresh</button>
+                <button id="backBtn" onclick="drillBack()" class="btn-brand bg-slate-100 !text-slate-700 hover:bg-slate-200 py-0.5 px-3 hidden uppercase tracking-tighter text-[10px]">Back</button>
             </div>
         </div>
-        <div class="flex-1 max-w-xs bg-slate-100 border rounded px-2 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-4">
-            <i class="ph ph-magnifying-glass text-slate-400 mr-1 text-sm"></i>
-            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Search active data..." class="w-full bg-transparent py-1 text-xs outline-none">
+        <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
+            <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
+            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active records..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
+    <!-- Data Table Container -->
     <div class="flex-1 overflow-auto bg-white scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed min-w-[4000px]">
+        <table class="odoo-table w-full text-left table-fixed">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div id="noData" class="flex flex-col items-center justify-center py-20 text-slate-300 hidden">
-            <i class="ph ph-folder-open text-4xl opacity-20 mb-2"></i>
-            <p class="font-bold uppercase tracking-widest text-[10px]">No records found</p>
+        <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
+            <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
+            <p class="font-bold uppercase tracking-widest text-xs">No matching records found</p>
         </div>
     </div>
 
-    <!-- Interview Modal -->
+    <!-- MODAL: Interview Scheduler -->
     <div id="interviewModal" class="modal-overlay">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform transition-all">
-            <div class="p-3 border-b bg-indigo-50 flex items-center justify-between">
-                <h3 class="font-bold text-indigo-800 text-xs uppercase">Schedule Interview</h3>
-                <button onclick="closeModal('interviewModal')" class="p-1 hover:bg-white rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform transition-all border border-slate-200">
+            <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
+                <h3 class="font-bold text-indigo-800 text-xs uppercase tracking-widest text-left">Schedule Interview</h3>
+                <button onclick="closeModal('interviewModal')" class="p-1 hover:bg-white rounded-full"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="p-4 space-y-3 text-left">
-                <div class="grid grid-cols-2 gap-3">
+            <div class="p-6 space-y-4 text-left">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Date</label>
-                        <input type="date" id="intDate" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Date</label>
+                        <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
                     </div>
                     <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Time</label>
-                        <input type="time" id="intTime" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Time</label>
+                        <input type="time" id="intTime" value="11:00" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
                     </div>
                 </div>
                 <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Format</label>
-                    <select id="intFormat" onchange="updateIntLocLabel()" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Format</label>
+                    <select id="intFormat" onchange="updateIntLocLabel()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none">
                         <option value="Google Meet">Google Meet</option>
                         <option value="Telephonic">Telephonic Interview</option>
                         <option value="F2F">Face to Face (F2F)</option>
                     </select>
                 </div>
                 <div>
-                    <label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Meeting Link / Office Address</label>
-                    <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
+                    <label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Link / Address</label>
+                    <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
                 </div>
             </div>
-            <div class="p-3 bg-slate-50 border-t flex justify-end gap-2">
-                <button onclick="closeModal('interviewModal')" class="text-[10px] font-bold text-slate-500">Cancel</button>
-                <button onclick="generateIntInvite()" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest shadow-md">Prepare Invitation</button>
+            <div class="p-4 bg-slate-50 border-t flex justify-end gap-3">
+                <button onclick="closeModal('interviewModal')" class="text-[11px] font-bold text-slate-500 px-4">Cancel</button>
+                <button onclick="submitInterviewInvite()" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest shadow-lg">Prepare Invitation</button>
             </div>
         </div>
     </div>
 
-    <!-- Message Preview Modal -->
+    <!-- MODAL: Message Preview -->
     <div id="messageModal" class="modal-overlay">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all">
-            <div class="p-3 border-b bg-slate-50 flex items-center justify-between">
-                <div>
-                    <h3 id="modalTitle" class="font-bold text-slate-800 text-xs uppercase">Preview</h3>
-                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Enriched Template</p>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
+            <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
+                <div class="text-left">
+                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase tracking-tighter">Preview</h3>
+                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Engine</p>
                 </div>
-                <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full text-slate-400 transition-all"><i class="ph ph-x text-lg"></i></button>
+                <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="p-4 space-y-3 text-left">
-                <div id="emailSubjectContainer">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Subject Line</label>
-                    <div id="emailSubject" class="p-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
+            <div class="p-6 space-y-4">
+                <div id="emailSubjectContainer" class="text-left">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
+                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
                 </div>
-                <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block text-left">Message Body</label>
-                    <textarea id="messageBody" class="w-full h-80 p-3 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none"></textarea>
+                <div class="text-left">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none shadow-inner scrollbar-hide"></textarea>
                 </div>
             </div>
-            <div class="p-3 bg-slate-50 border-t flex items-center justify-between">
-                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-teal-600 uppercase tracking-widest flex items-center gap-1 transition-colors">
-                    <i class="ph ph-copy text-sm"></i> Copy
+            <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
+                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-[#714B67] uppercase tracking-widest flex items-center gap-2">
+                    <i class="ph ph-copy text-lg"></i> Copy Message
                 </button>
                 <div class="flex gap-2">
-                    <button id="waActionBtn" class="bg-emerald-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 hover:bg-emerald-700 shadow-sm">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all">
                         <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
                     </button>
-                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 hover:bg-indigo-700 shadow-sm">
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md transition-all">
                         <i class="ph ph-envelope text-lg"></i> Email
                     </button>
                 </div>
@@ -162,65 +180,93 @@
         </div>
     </div>
 
-    <!-- AI Drawer -->
-    <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l flex flex-col">
-        <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
+    <!-- AI Sidebar (Gemini) -->
+    <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l border-slate-200 flex flex-col">
+        <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
             <h3 class="font-bold text-teal-700 text-[10px] flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Analysis</h3>
-            <button onclick="closeAi()"><i class="ph ph-x text-lg text-slate-400"></i></button>
+            <button onclick="closeAi()"><i class="ph ph-x text-xl text-slate-400"></i></button>
         </div>
-        <div id="aiContent" class="p-4 flex-1 overflow-auto text-xs text-left leading-relaxed text-slate-600 italic">Select a record to run ranker...</div>
-    </div>
-
-    <div id="loader">
-        <div class="spinner mb-2"></div>
-        <p class="text-[10px] font-bold text-teal-600 uppercase tracking-[0.2em] animate-pulse">Syncing Database</p>
+        <div id="aiContent" class="p-6 flex-1 overflow-auto text-[11px] text-left leading-relaxed text-slate-600 italic">Select record...</div>
     </div>
 
     <script>
-        // REPLACE THIS with your Apps Script Web App URL
+        // --- CORE LOGIC ---
         const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
         
-        let currentView = 'Job Board';
+        let currentTab = 'Job Board';
+        let drillDown = { type: null, id: null, label: null };
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
         let filteredData = [];
-        let activeIdx = null;
+        let activeRowIdx = null;
 
-        async function init() {
-            if (API_URL.includes("PASTE_YOUR")) return;
-            refreshData();
-        }
+        window.onload = function() {
+            if (!API_URL.includes("PASTE_YOUR")) refreshData();
+            switchTab('Job Board');
+        };
 
         async function refreshData() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 fullData = await resp.json();
-                switchView(currentView);
-            } catch (err) { console.error("Sync Error:", err); }
+                renderUI();
+            } catch (err) { console.error("Sync error:", err); }
             showLoader(false);
         }
 
-        async function syncWebsiteForm() {
+        async function syncWebsiteApplications() {
             showLoader(true);
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message);
+                alert(res.message || "Website Sync Complete.");
                 refreshData();
-            } catch (err) { alert("Sync Error."); }
+            } catch (err) { alert("Sync failed."); }
             showLoader(false);
         }
 
-        function switchView(view) {
-            currentView = view;
-            document.getElementById('currentTabName').innerText = view;
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab'));
-            const map = { 'Job Board': 'tab-jobs', 'Sourced': 'tab-sourced', 'Candidates': 'tab-candidates', 'Interview Tracker': 'tab-interviews', 'Clients': 'tab-clients', 'Dashboard and Billing': 'tab-billing' };
-            if(map[view]) document.getElementById(map[view]).classList.add('active-tab');
-            document.getElementById('backBtn').classList.add('hidden');
+        function switchTab(tab) {
+            currentTab = tab;
+            drillDown = { type: null, id: null, label: null };
+            const nav = document.getElementById('mainNav');
+            Array.from(nav.children).forEach(btn => {
+                btn.classList.remove('active-tab');
+                if (btn.innerText === tab) btn.classList.add('active-tab');
+            });
+            renderUI();
+        }
 
-            const sourceMap = { 'Job Board': fullData.jobs, 'Sourced': fullData.sourced, 'Candidates': fullData.candidates, 'Interview Tracker': fullData.interviews, 'Clients': fullData.clients, 'Dashboard and Billing': fullData.billing };
-            filteredData = Array.isArray(sourceMap[view]) ? sourceMap[view] : [];
+        function setDrillDown(type, id, label) {
+            drillDown = { type, id, label };
+            renderUI();
+        }
+
+        function resetNavigation() {
+            drillDown = { type: null, id: null, label: null };
+            renderUI();
+        }
+
+        function drillBack() { resetNavigation(); }
+
+        function renderUI() {
+            document.getElementById('currentPath').innerText = currentTab;
+            document.getElementById('backBtn').classList.add('hidden');
+            
+            let dataset = [];
+            if (drillDown.type === 'client-jobs') {
+                dataset = fullData.jobs.filter(j => j.CLIENT_ID === drillDown.id);
+                document.getElementById('currentPath').innerText = `Clients / ${drillDown.id} / Jobs`;
+                document.getElementById('backBtn').classList.remove('hidden');
+            } else if (drillDown.type === 'job-candidates') {
+                dataset = fullData.candidates.filter(c => c.JOB_ID === drillDown.id);
+                document.getElementById('currentPath').innerText = `Jobs / ${drillDown.id} / Candidates`;
+                document.getElementById('backBtn').classList.remove('hidden');
+            } else {
+                const key = currentTab.toLowerCase().replace(/ /g, '_');
+                dataset = fullData[key] || fullData.jobs;
+            }
+
+            filteredData = dataset;
             renderTable();
         }
 
@@ -233,74 +279,156 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            // Header selection with exhaustive fields for transparency
-            let cols = [];
-            if (currentView === 'Candidates') {
-                cols = ['JOB_ID', 'APP_ID', 'CLIENT_ID', 'JOB_TITLE', 'JOB_LOCATION', 'CURRENT_STATUS', 'CANDIDATE_NAME', 'PHONE', 'EMAIL', 'EDUCATION', 'TOTAL_EXPERIENCE', 'RELEVANT_EXPERIENCE', 'CURRENT_CTC', 'EXPECTED_CTC', 'NOTICE_PERIOD', 'INTERVIEW_TELEPHONIC', 'INTERVIEW_F2F', 'CURRENT_LOCATION', 'RESUME_LINK', 'SUBMITTED_DATE'];
-            } else if (currentView === 'Clients') {
-                cols = ['CLIENT_ID', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'COMPANY_NAME', 'WEBSITE', 'ASSIGNED_JOBS_COUNT', 'ADDRESS', 'CLIENT_STATUS'];
-            } else if (currentView === 'Dashboard and Billing') {
-                cols = ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'PERCENTAGE_COMMISSION', 'CTC_CANDIDATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE'];
-            } else if (currentView === 'Job Board') {
-                cols = ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'JOB_STATUS', 'LOCATION', 'OPEN_POSITIONS', 'EXPERIENCE_REQUIRED', 'CTC_RANGE', 'POSTED_ON', 'JD_LINK'];
-            } else if (currentView === 'Sourced') {
-                cols = ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'CANDIDATE_SOURCED', 'SOURCED_EMAIL', 'SOURCED_PHONE', 'OUTREACH_DATE', 'STATUS'];
-            } else if (currentView === 'Interview Tracker') {
-                cols = ['INTERVIEW_ID', 'CANDIDATE_ID', 'CLIENT_ID', 'CANDIDATE_NAME', 'COMPANY_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'];
+            const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates' || currentTab === 'Sourced');
+
+            let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
+            
+            if (isCandidatesView) {
+                headerHtml += `
+                    <th class='w-28'>App ID</th>
+                    <th class='w-64'>Candidate</th>
+                    <th class='w-56'>Applied For</th>
+                    <th class='w-40'>Experience</th>
+                    <th class='w-40'>CTC Details</th>
+                    <th class='w-64'>Notice & Location</th>
+                    <th class='w-24 text-center'>Docs</th>
+                    <th class='w-32'>Applied On</th>`;
+            } else if (currentTab === 'Job Board') {
+                headerHtml += `<th>Job ID</th><th>Role Details</th><th>Client Details</th><th>Experience & CTC</th><th>Status & Type</th><th>Posted</th>`;
+            } else if (currentTab === 'Clients') {
+                headerHtml += `<th>Client ID</th><th>Company</th><th>Primary Contact</th><th>Address & Website</th><th>Status</th>`;
+            } else if (currentTab === 'Dashboard and Billing') {
+                headerHtml += `<th>Client/Candidate</th><th>Dates</th><th>Commercials</th><th>Status</th>`;
             } else {
-                cols = Object.keys(filteredData[0]).filter(k => !k.startsWith('_'));
+                const cols = Object.keys(filteredData[0]).filter(k => !k.startsWith('_'));
+                cols.forEach(c => headerHtml += `<th>${c.replace(/_/g, ' ')}</th>`);
             }
             
-            let hRow = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
-            cols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
-            hRow += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-28 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]'>Actions</th></tr>";
-            head.innerHTML = hRow;
+            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-28 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]'>Actions Bar</th></tr>";
+            head.innerHTML = headerHtml;
 
             filteredData.forEach((row, i) => {
-                let clickFn = '';
-                if (currentView === 'Clients') clickFn = `drillDownJobs('${row.CLIENT_ID}')`;
-                else if (currentView === 'Job Board') clickFn = `drillDownCandidates('${row.JOB_ID}')`;
+                let rowClick = '';
+                if (currentTab === 'Clients') rowClick = `setDrillDown('client-jobs', '${row.CLIENT_ID}', '${row.COMPANY_NAME}')`;
+                else if (currentTab === 'Job Board') rowClick = `setDrillDown('job-candidates', '${row.JOB_ID}', '${row.POSITION_TITLE}')`;
 
-                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${clickFn}">`;
+                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${rowClick}">`;
                 bRow += `<td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
-                cols.forEach(c => bRow += `<td>${formatVal(c, row[c])}</td>`);
-                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)]">
-                            <div class="flex items-center justify-end gap-1.5" onclick="event.stopPropagation()">${getActions(row, i)}</div>
+
+                if (isCandidatesView) {
+                    bRow += `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.APP_ID || row.CANDIDATE_ID || '--'}</td>`;
+                    bRow += `<td>
+                                <div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_NAME || row.CANDIDATE_SOURCED}</div>
+                                <div class="text-[10px] text-slate-400">${row.EMAIL || row.SOURCED_EMAIL || '--'}</div>
+                                <div class="text-[10px] text-[#714B67] font-bold">${row.PHONE || row.SOURCED_PHONE || '--'}</div>
+                             </td>`;
+                    bRow += `<td>
+                                <div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div>
+                                <div class="text-[9px] text-slate-400 uppercase font-bold">${row.JOB_ID || '--'}</div>
+                             </td>`;
+                    bRow += `<td>
+                                <div class="text-slate-600 font-medium">Total: ${row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '0'} Yrs</div>
+                                <div class="text-[10px] text-slate-400 italic">Rel: ${row.RELEVANT_EXPERIENCE || row.RELEVANT_EXPERIENCE_YRS || '0'} Yrs</div>
+                             </td>`;
+                    bRow += `<td>
+                                <div class="text-emerald-700 font-bold">Exp: ${row.EXPECTED_CTC || '--'}</div>
+                                <div class="text-[9px] text-slate-400">Curr: ${row.CURRENT_CTC || row.LAST_DRAWN_CTC || '--'}</div>
+                             </td>`;
+                    bRow += `<td>
+                                <div class="text-slate-600 font-medium">${row.NOTICE_PERIOD || '--'}</div>
+                                <div class="text-[10px] text-slate-400">${row.CURRENT_LOCATION || row.LOCATION || '--'}</div>
+                             </td>`;
+                    bRow += `<td class='text-center'>
+                                ${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100 shadow-sm">View CV</a>` : '--'}
+                             </td>`;
+                    bRow += `<td class="text-slate-400 font-bold text-[10px]">${row.SUBMITTED_DATE || row.APPLIED_DATE || row.OUTREACH_DATE || '--'}</td>`;
+                } else if (currentTab === 'Job Board') {
+                    bRow += `<td class='font-mono text-xs'>${row.JOB_ID}</td>`;
+                    bRow += `<td><div class='font-bold text-slate-900'>${row.POSITION_TITLE}</div><div class='text-[10px] text-slate-400 italic'>${row.LOCATION}</div></td>`;
+                    bRow += `<td><div class='font-bold text-teal-700'>${row.CLIENT_ID}</div></td>`;
+                    bRow += `<td><div class='text-slate-600 font-medium'>Exp: ${row.EXPERIENCE_REQUIRED}</div><div class='text-[10px] text-slate-400'>Budget: ${row.CTC_RANGE}</div></td>`;
+                    bRow += `<td>${renderCell('JOB_STATUS', row.JOB_STATUS)} <br> <span class='text-[9px] text-slate-400'>${row.JOB_TYPE || 'Full-time'}</span></td>`;
+                    bRow += `<td class='text-[10px] text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
+                } else if (currentTab === 'Clients') {
+                    bRow += `<td class='font-mono text-xs'>${row.CLIENT_ID}</td>`;
+                    bRow += `<td><div class='font-bold text-slate-900'>${row.COMPANY_NAME}</div></td>`;
+                    bRow += `<td><div class='font-bold text-slate-700'>${row.CONTACT_NAME || '--'}</div><div class='text-[10px] text-slate-400'>${row.EMAIL}</div><div class='text-[10px] text-teal-600 font-bold'>${row.PHONE}</div></td>`;
+                    bRow += `<td><div class='text-[10px] text-slate-500'>${row.ADDRESS || '--'}</div><div class='text-[9px] text-blue-500 font-bold'>${row.WEBSITE || '--'}</div></td>`;
+                    bRow += `<td>${renderCell('CLIENT_STATUS', row.CLIENT_STATUS)}</td>`;
+                } else if (currentTab === 'Dashboard and Billing') {
+                    bRow += `<td><div class='font-bold text-slate-900'>${row.CLIENT_NAME}</div><div class='text-[10px] text-slate-500'>${row.CANDIDATE_NAME}</div></td>`;
+                    bRow += `<td><div class='text-[10px] font-bold text-slate-700'>Joined: ${row.JOINING_DATE}</div></td>`;
+                    bRow += `<td><div class='text-emerald-700 font-bold'>Amt: ₹${Number(row.BILLING_AMOUNT || 0).toLocaleString()}</div><div class='text-[9px] text-slate-400 italic'>Comm: ${row.PERCENTAGE_COMMISSION}%</div></td>`;
+                    bRow += `<td>${renderCell('PAYMENT_STATUS', row.PAYMENT_STATUS)}</td>`;
+                } else {
+                    const cols = Object.keys(row).filter(k => !k.startsWith('_'));
+                    cols.forEach(c => bRow += `<td>${renderCell(c, row[c])}</td>`);
+                }
+
+                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)]" onclick="event.stopPropagation()">
+                            <div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div>
                          </td></tr>`;
                 body.innerHTML += bRow;
             });
         }
 
-        function drillDownJobs(clientId) {
-            filteredData = fullData.jobs.filter(j => j.CLIENT_ID === clientId);
-            document.getElementById('currentTabName').innerText = `Clients / ${clientId} / Jobs`;
-            document.getElementById('backBtn').classList.remove('hidden');
-            renderTable();
+        function renderCell(k, v) {
+            if (!v && v !== 0) return "<span class='text-slate-200'>--</span>";
+            if (k.includes('STATUS')) {
+                const s = String(v).toLowerCase();
+                let cls = "bg-slate-100 text-slate-500 border-slate-200";
+                if (['open', 'active', 'hired', 'hot', 'submitted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
+                if (['rejected', 'cold', 'dropped', 'off'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
+                return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
+            }
+            if (k.includes('AMOUNT') || k.includes('CTC')) return `<span class="font-bold text-slate-800 tracking-tight">₹${Number(v).toLocaleString()}</span>`;
+            return v;
         }
 
-        function drillDownCandidates(jobId) {
-            filteredData = fullData.candidates.filter(c => c.JOB_ID === jobId);
-            document.getElementById('currentTabName').innerText = `Job / ${jobId} / Candidates`;
-            document.getElementById('backBtn').classList.remove('hidden');
-            renderTable();
-        }
-
-        function resetDrillDown() { switchView(currentView); }
-
-        function getActions(row, i) {
-            let html = `<button onclick="runAi(${i}, event)" class="action-btn text-teal-600" title="Gemini Analysis"><i class="ph ph-sparkle-fill text-base"></i></button>`;
-            if (currentView === 'Candidates' || currentView === 'Sourced' || currentView === 'Job Board') {
-                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-                html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
+        function renderActions(row, i) {
+            let html = `<button onclick="runAiRank(${i})" class="action-btn text-teal-600" title="Gemini Rank"><i class="ph ph-sparkle-fill text-base"></i></button>`;
+            if (currentTab === 'Candidates' || currentTab === 'Sourced' || drillDown.type === 'job-candidates') {
+                html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="composeMessage('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
                 html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Schedule Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             }
             return html;
         }
 
+        // --- NAVIGATION ---
+        function setDrillDown(type, id, label) { drillDown = { type, id, label }; renderUI(); }
+        function resetNavigation() { drillDown = { type: null, id: null, label: null }; renderUI(); }
+        function drillBack() { resetNavigation(); }
+
+        // --- COMMUNICATION ---
+        async function composeMessage(key, idx) {
+            showLoader(true);
+            const row = filteredData[idx];
+            // Ensure fields flow for snapshot
+            const rowData = { ...row };
+            try {
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
+                const res = await resp.json();
+                
+                document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
+                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || "Applicant Record";
+                document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
+                document.getElementById('emailSubject').innerText = res.subject;
+                document.getElementById('messageBody').value = res.message;
+                
+                const rawPh = (res.phone || "").toString().replace(/\D/g, '');
+                const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
+                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
+                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+                
+                openModal('messageModal');
+            } catch (err) { alert("Data flow failed for communication template."); }
+            showLoader(false);
+        }
+
         function openIntModal(idx) {
-            activeIdx = idx;
+            activeRowIdx = idx;
             document.getElementById('intDate').valueAsDate = new Date();
-            document.getElementById('intTime').value = "11:00";
             updateIntLocLabel();
             openModal('interviewModal');
         }
@@ -310,102 +438,63 @@
             const lbl = document.getElementById('intLocLabel');
             const inp = document.getElementById('intLocation');
             if (fmt === 'Google Meet') { lbl.innerText = "Meeting Link"; inp.value = "https://meet.google.com/vcj-dfaf-pcc"; }
-            else if (fmt === 'Telephonic') { lbl.innerText = "Phone Number"; inp.value = filteredData[activeIdx]?.PHONE || filteredData[activeIdx]?.SOURCED_PHONE || ""; }
+            else if (fmt === 'Telephonic') { lbl.innerText = "Phone Number"; inp.value = filteredData[activeRowIdx]?.PHONE || ""; }
             else { lbl.innerText = "Office Address"; inp.value = "Hiregrow Office, Kalyan Nagar, Bangalore"; }
         }
 
-        function generateIntInvite() {
+        async function submitInterviewInvite() {
+            showLoader(true);
             const overrides = {
                 INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
                 INTERVIEW_TIME: document.getElementById('intTime').value,
                 INTERVIEW_MODE: document.getElementById('intFormat').value,
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
-            closeModal('interviewModal');
-            compose('INTERVIEW_INVITATION_WA', activeIdx, overrides);
-        }
-
-        async function compose(key, idx, overrides = {}) {
-            showLoader(true);
-            const row = filteredData[idx];
             try {
-                const resp = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: row, overrides: overrides })
-                });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
                 const res = await resp.json();
-                document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
-                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.Candidate_Name || "Record";
-                document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
-                document.getElementById('emailSubject').innerText = res.subject;
+                closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
-                
-                const rawPhone = (res.phone || "").toString().replace(/\D/g, '');
-                const waPhone = rawPhone.length === 10 ? '91' + rawPhone : rawPhone;
-                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(res.message)}`, '_blank');
-                document.getElementById('emailActionBtn').onclick = () => {
-                    const email = row.EMAIL || row.Email || "";
-                    window.open(`mailto:${email}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
-                };
                 openModal('messageModal');
-            } catch (err) { alert("Template Engine Error."); }
+            } catch (err) { alert("Interview generation error."); }
             showLoader(false);
         }
 
-        function formatVal(k, v) {
-            if (!v && v !== 0) return "--";
-            const s = String(v).toLowerCase();
-            if (k.includes('STATUS') || k.includes('PRIORITY')) {
-                let cls = "bg-slate-100 text-slate-500 border-slate-200";
-                if (['open', 'active', 'hired', 'hot', 'submitted', 'shortlisted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
-                if (['rejected', 'cold', 'dropped', 'off'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
-                return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
-            }
-            if (k.includes('AMOUNT') || k.includes('CTC')) {
-                const num = Number(String(v).replace(/[^0-9.-]+/g,""));
-                return isNaN(num) ? v : `₹${num.toLocaleString()}`;
-            }
-            return v;
-        }
-
-        async function runAi(idx, e) {
-            e.stopPropagation();
+        async function runAiRank(idx) {
             const row = filteredData[idx];
-            let job = currentView === 'Job Board' ? row : (fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0] || {});
+            const job = fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0];
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-2"></div><p class="text-[9px] uppercase font-bold text-slate-400">Gemini Ranking...</p></div>`;
+            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing fitment...</div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest text-left">Fitment Verdict: ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed text-left text-[11px]">${res.analysis}</div>`;
-            } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">Error.</div>`; }
+                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Candidate"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
+            } catch (err) { document.getElementById('aiContent').innerText = "AI Ranking Service Offline."; }
         }
 
-        function handleSearch() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            const sourceMap = { 'Job Board': fullData.jobs, 'Sourced': fullData.sourced, 'Candidates': fullData.candidates, 'Interview Tracker': fullData.interviews, 'Clients': fullData.clients, 'Dashboard and Billing': fullData.billing };
-            const base = sourceMap[currentView] || [];
+        // --- UI HELPERS ---
+        function handleFilter() {
+            const q = document.getElementById('globalSearch').value.toLowerCase();
+            const key = currentTab.toLowerCase().replace(/ /g, '_');
+            const base = fullData[key] || [];
             filteredData = base.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
             renderTable();
         }
-
-        function copyMessage() { const body = document.getElementById('messageBody'); body.select(); document.execCommand('copy'); alert("Copied to clipboard!"); }
+        function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
-        function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
-        
+        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied to clipboard!"); }
         async function testConnection() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected Successfully!");
-                if(!res.error) refreshData();
-            } catch (e) { alert("❌ Backend Unreachable."); }
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database is live.");
+            } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
-        window.onload = init;
+        function resetApp() { resetNavigation(); switchTab('Job Board'); }
     </script>
 </body>
 </html>
