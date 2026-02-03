@@ -99,7 +99,7 @@
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
+            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active records..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
@@ -178,10 +178,10 @@
                     <i class="ph ph-copy text-lg"></i> Copy Message
                 </button>
                 <div class="flex gap-2">
-                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all">
                         <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
                     </button>
-                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md">
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md transition-all">
                         <i class="ph ph-envelope text-lg"></i> Email
                     </button>
                 </div>
@@ -189,7 +189,7 @@
         </div>
     </div>
 
-    <!-- AI Sidebar -->
+    <!-- AI Sidebar (Gemini) -->
     <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l border-slate-200 flex flex-col text-left">
         <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
             <h3 class="font-bold text-teal-700 text-[10px] flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Analysis</h3>
@@ -199,6 +199,7 @@
     </div>
 
     <script>
+        // --- CORE LOGIC ---
         const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
         
         let currentTab = 'Job Board';
@@ -241,7 +242,7 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message || "Sync Success.");
+                alert(res.message || "Website Applicants Synced to CRM Candidates Sheet.");
                 switchTab('Candidates');
                 refreshData();
             } catch (err) { alert("Sync failed."); }
@@ -287,7 +288,7 @@
                 else if (currentTab === 'Interview Tracker') dataset = fullData.interviews || [];
                 else {
                     const key = currentTab.toLowerCase().replace(/ /g, '_');
-                    dataset = fullData[key] || [];
+                    dataset = fullData[key] || (currentTab === 'Job Board' ? fullData.jobs : []);
                 }
             }
             filteredData = dataset;
@@ -303,22 +304,25 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
+            const firstRow = filteredData[0];
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
             const isSourcedView = (currentTab === 'Sourced');
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
+            const isInterviews = (currentTab === 'Interview Tracker');
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             
             if (isCandidatesView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-64'>Notice & Location</th><th class='w-24 text-center'>CV</th>`;
+                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-64'>Notice & Location</th><th class='w-24 text-center'>Docs</th>`;
             } else if (isSourcedView) {
                 headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Experience</th><th class='w-40'>CTC Range</th><th class='w-32'>Status</th><th class='w-32'>Sourced On</th>`;
             } else if (isJobBoard) {
-                headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-56'>Experience & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
+                headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
+            } else if (isInterviews) {
+                headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-40'>Next Step</th>`;
             } else if (currentTab === 'Clients') {
                 headerHtml += `<th class='w-24'>ID</th><th class='w-56'>Company Name</th><th class='w-64'>Contact Info</th><th class='w-64'>Address & Website</th><th class='w-32'>Status</th>`;
             } else {
-                const firstRow = filteredData[0];
                 Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
@@ -339,11 +343,17 @@
                     bRow += renderGroupedRow(row, 'Sourced');
                 } else if (isJobBoard) {
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.JOB_ID}</td>`;
-                    bRow += `<td><div class='data-stack-title'>${row.POSITION_TITLE}</div><div class='data-stack-sub'>${row.LOCATION}</div></td>`;
-                    bRow += `<td><div class='data-stack-brand'>${row.CLIENT_ID}</div></td>`;
-                    bRow += `<td><div class='font-medium text-slate-600'>Exp: ${row.EXPERIENCE_REQUIRED}</div><div class='data-stack-sub'>Budget: ${row.CTC_RANGE}</div></td>`;
-                    bRow += `<td>${renderValue('JOB_STATUS', row.JOB_STATUS)}</td>`;
+                    bRow += `<td><div class='data-stack-title'>${row.POSITION_TITLE || row.TITLE}</div><div class='data-stack-sub'>${row.LOCATION}</div></td>`;
+                    bRow += `<td><div class='data-stack-brand'>${row.CLIENT_ID || row.COMPANY}</div></td>`;
+                    bRow += `<td><div class='font-medium text-slate-600'>Exp: ${row.EXPERIENCE_REQUIRED || row.MIN_EXPERIENCE}</div><div class='data-stack-sub'>Budget: ${row.CTC_RANGE || row.MIN_SALARY}</div></td>`;
+                    bRow += `<td>${renderValue('JOB_STATUS', row.JOB_STATUS || row.STATUS)}</td>`;
                     bRow += `<td class='text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
+                } else if (isInterviews) {
+                    bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td>`;
+                    bRow += `<td><div class='data-stack-title'>${row.CANDIDATE_NAME}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID}</div></td>`;
+                    bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME}</div><div class='data-stack-sub'>${row.POSITION_TITLE}</div></td>`;
+                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE} @ ${row.INTERVIEW_TIME}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE}</div></td>`;
+                    bRow += `<td><div class='data-stack-sub font-bold'>${row.NEXT_STEP || '--'}</div></td>`;
                 } else if (currentTab === 'Clients') {
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.CLIENT_ID}</td>`;
                     bRow += `<td class='data-stack-title'>${row.COMPANY_NAME}</td>`;
@@ -380,7 +390,7 @@
             
             if (type === 'Candidates') {
                 html += `<td><div class="text-slate-600 font-medium">${row.NOTICE_PERIOD || '--'}</div><div class="text-[10px] text-slate-400">${row.CURRENT_LOCATION || row.LOCATION || '--'}</div></td>`;
-                html += `<td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">View</a>` : '--'}</td>`;
+                html += `<td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">CV</a>` : '--'}</td>`;
             } else {
                 html += `<td>${renderValue('STATUS', row.STATUS)}</td>`;
                 html += `<td class="text-slate-400 font-bold text-[10px]">${date}</td>`;
@@ -395,7 +405,7 @@
                 const s = String(v).toLowerCase();
                 let cls = "bg-slate-100 text-slate-500 border-slate-200";
                 if (['open', 'active', 'hired', 'confirmed', 'paid', 'submitted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
-                if (['rejected', 'cold', 'dropped', 'off', 'overdue'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
+                if (['rejected', 'cold', 'dropped', 'off', 'overdue', 'cancelled'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
                 return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
             }
             if (key.includes('ctc') || key.includes('amount')) return `<span class="font-bold text-slate-800 tracking-tight">₹${Number(v).toLocaleString()}</span>`;
@@ -421,7 +431,12 @@
             showLoader(true);
             const row = filteredData[idx];
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: row }) });
+                const rowData = { ...row, 
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS,
+                    LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC,
+                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION
+                };
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
@@ -475,11 +490,11 @@
             const row = filteredData[idx];
             const job = fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0];
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing...</div>`;
+            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing...</div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Candidate"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
+                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || row.CANDIDATE_SOURCED}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
             } catch (err) { document.getElementById('aiContent').innerText = "AI Offline."; }
         }
 
