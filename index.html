@@ -15,7 +15,7 @@
         .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
-        /* High-Density Reference Styled Table */
+        /* High-Density Compact Table */
         .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .odoo-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; }
         .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
@@ -34,16 +34,22 @@
         .action-btn:hover { background-color: #f1f5f9; transform: scale(1.15); }
         
         .breadcrumb-item:hover { color: var(--odoo-teal); cursor: pointer; text-decoration: underline; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        /* Scroll fixes */
+        .table-container { flex: 1; overflow: auto; background-color: white; }
+        .scrollbar-hide::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-hide::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .scrollbar-hide::-webkit-scrollbar-track { background: #f1f5f9; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
+    <!-- Global Loader -->
     <div id="loader">
         <div class="spinner mb-4"></div>
         <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Google Sheets Data</p>
     </div>
 
+    <!-- Navigation Header -->
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-6 h-full">
             <div class="flex items-center gap-2 cursor-pointer" onclick="resetNavigation()">
@@ -71,7 +77,8 @@
         </div>
     </header>
 
-    <div class="bg-white py-2 px-6 flex items-center justify-between border-b shrink-0 h-14">
+    <!-- Subheader: Breadcrumbs & Filters -->
+    <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                 <span class="breadcrumb-item" onclick="resetNavigation()">CRM</span> / <span id="currentPath">Job Board</span>
@@ -87,18 +94,19 @@
         </div>
     </div>
 
-    <div class="flex-1 overflow-auto bg-white scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed min-w-[3500px]" id="dataTable">
+    <!-- Data Table Container -->
+    <div class="table-container scrollbar-hide">
+        <table class="odoo-table w-full text-left table-fixed min-w-[3000px]" id="dataTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
         <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
             <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
-            <p class="font-bold uppercase tracking-widest text-xs">No records found in this sheet</p>
+            <p class="font-bold uppercase tracking-widest text-xs">No records found</p>
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- MODAL: Interview Scheduler -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
@@ -136,6 +144,7 @@
         </div>
     </div>
 
+    <!-- MODAL: Message Preview -->
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
@@ -151,7 +160,7 @@
                     <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700 text-left"></div>
                 </div>
                 <div class="text-left">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block text-left">Message Content</label>
                     <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none shadow-inner"></textarea>
                 </div>
             </div>
@@ -181,6 +190,7 @@
     </div>
 
     <script>
+        // --- CORE LOGIC ---
         const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
         
         let currentTab = 'Job Board';
@@ -209,7 +219,7 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message);
+                alert(res.message || "Website Sync Complete.");
                 refreshData();
             } catch (err) { alert("Sync failed."); }
             showLoader(false);
@@ -243,8 +253,9 @@
             document.getElementById('backBtn').classList.add('hidden');
             
             let dataset = [];
+            // Mapping Logic
             if (drillDown.type === 'client-jobs') {
-                dataset = fullData.jobs.filter(j => j.CLIENT_ID === drillDown.id);
+                dataset = fullData.jobs.filter(j => (j.CLIENT_ID || j.CLIENT_NAME) === drillDown.id);
                 document.getElementById('currentPath').innerText = `Clients / ${drillDown.id} / Jobs`;
                 document.getElementById('backBtn').classList.remove('hidden');
             } else if (drillDown.type === 'job-candidates') {
@@ -252,8 +263,12 @@
                 document.getElementById('currentPath').innerText = `Jobs / ${drillDown.id} / Candidates`;
                 document.getElementById('backBtn').classList.remove('hidden');
             } else {
-                const key = currentTab.toLowerCase().replace(/ /g, '_');
-                dataset = fullData[key] || fullData.jobs;
+                if (currentTab === 'Dashboard and Billing') dataset = fullData.billing;
+                else if (currentTab === 'Interview Tracker') dataset = fullData.interviews;
+                else {
+                    const key = currentTab.toLowerCase().replace(/ /g, '_');
+                    dataset = fullData[key] || fullData.jobs;
+                }
             }
 
             filteredData = dataset;
@@ -272,14 +287,14 @@
             const firstRow = filteredData[0];
             const allKeys = Object.keys(firstRow).filter(k => !k.startsWith('_'));
 
-            // Check if we should use the "Compact Reference Layout" (Grouped Mode)
+            // Compact Reference Layout Logic
             const isGroupedView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates' || currentTab === 'Sourced');
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             
             if (isGroupedView) {
                 headerHtml += `
-                    <th class='w-28'>App ID</th>
+                    <th class='w-28'>Job ID</th>
                     <th class='w-64'>Candidate</th>
                     <th class='w-56'>Applied For</th>
                     <th class='w-40'>Experience</th>
@@ -288,7 +303,7 @@
                     <th class='w-24 text-center'>Docs</th>
                     <th class='w-32'>Applied On</th>`;
             } else {
-                // PURELY DYNAMIC: Use only fields available in backend
+                // Show only fields present in the sheet
                 allKeys.forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
@@ -304,13 +319,11 @@
                 bRow += `<td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
 
                 if (isGroupedView) {
-                    // Grouped Logic based on Reference Code
-                    const appId = row.APP_ID || row.APPID || row.CANDIDATE_ID || '--';
+                    const jobId = row.JOB_ID || '--';
                     const name = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || '--';
                     const email = row.EMAIL || row.SOURCED_EMAIL || '--';
                     const phone = row.PHONE || row.SOURCED_PHONE || '--';
                     const jobTitle = row.JOB_TITLE || row.POSITION_TITLE || '--';
-                    const jobId = row.JOB_ID || '--';
                     const totalExp = row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '--';
                     const relExp = row.RELEVANT_EXPERIENCE || row.RELEVANT_EXPERIENCE_YRS || '--';
                     const expCtc = row.EXPECTED_CTC || '--';
@@ -320,7 +333,7 @@
                     const resume = row.RESUME_LINK || row.Resumelink || '';
                     const date = row.SUBMITTED_DATE || row.APPLIED_DATE || row.OUTREACH_DATE || '--';
 
-                    bRow += `<td class="font-mono text-[10px] text-slate-400 uppercase">${appId}</td>`;
+                    bRow += `<td class="font-mono text-[10px] text-slate-400 uppercase">${jobId}</td>`;
                     bRow += `<td>
                                 <div class="font-bold text-slate-900 leading-tight">${name}</div>
                                 <div class="text-[10px] text-slate-400">${email}</div>
@@ -331,8 +344,8 @@
                                 <div class="text-[9px] text-slate-400 uppercase font-bold">${jobId}</div>
                              </td>`;
                     bRow += `<td>
-                                <div class="text-slate-600 font-medium">Total: ${totalExp} Yrs</div>
-                                <div class="text-[10px] text-slate-400 italic">Rel: ${relExp} Yrs</div>
+                                <div class="text-slate-600 font-medium">Total: ${totalExp}</div>
+                                <div class="text-[10px] text-slate-400 italic">Rel: ${relExp}</div>
                              </td>`;
                     bRow += `<td>
                                 <div class="text-emerald-700 font-bold">Exp: ${expCtc}</div>
@@ -343,11 +356,10 @@
                                 <div class="text-[10px] text-slate-400">${location}</div>
                              </td>`;
                     bRow += `<td class='text-center'>
-                                ${resume ? `<a href="${resume}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">View CV</a>` : '--'}
+                                ${resume ? `<a href="${resume}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100 shadow-sm">View CV</a>` : '--'}
                              </td>`;
                     bRow += `<td class="text-slate-400 font-bold text-[10px]">${date}</td>`;
                 } else {
-                    // PURELY DYNAMIC: Loop only through available backend keys
                     allKeys.forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 }
 
@@ -363,8 +375,8 @@
             if (k.toLowerCase().includes('status')) {
                 const s = String(v).toLowerCase();
                 let cls = "bg-slate-100 text-slate-500 border-slate-200";
-                if (['open', 'active', 'hired', 'submitted', 'hot'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
-                if (['rejected', 'cold', 'dropped', 'off'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
+                if (['open', 'active', 'hired', 'submitted', 'hot', 'confirmed'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
+                if (['rejected', 'cold', 'dropped', 'off', 'cancelled'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
                 return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
             }
             if (k.toLowerCase().includes('ctc') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('salary')) {
@@ -375,35 +387,56 @@
 
         function renderActions(row, i) {
             let html = `<button onclick="runAiRank(${i})" class="action-btn text-teal-600" title="Gemini Analysis"><i class="ph ph-sparkle-fill text-base"></i></button>`;
+            
+            // Job Board Sharing JD
+            if (currentTab === 'Job Board') {
+                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-500" title="Email JD"><i class="ph ph-envelope-simple text-base"></i></button>`;
+            }
+            
+            // Client Messaging
+            if (currentTab === 'Clients') {
+                html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WhatsApp Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+            }
+
+            // Candidate/Source Actions
             if (currentTab === 'Candidates' || currentTab === 'Sourced' || drillDown.type === 'job-candidates') {
-                html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-                html += `<button onclick="composeMessage('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
+                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
                 html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Schedule Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             }
             return html;
         }
 
         // --- COMMUNICATION ENGINE ---
-        async function composeMessage(key, idx) {
+        async function compose(key, idx) {
             showLoader(true);
             const row = filteredData[idx];
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: row }) });
+                // Pre-map the context to ensure "flow"
+                const rowData = {
+                    ...row,
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS,
+                    LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC,
+                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION
+                };
+
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
-                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || "Applicant";
+                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject;
                 document.getElementById('messageBody').value = res.message;
                 
-                const rawPh = (res.phone || "").toString().replace(/\D/g, '');
+                const rawPh = (res.phone || row.PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
                 document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
                 
                 openModal('messageModal');
-            } catch (err) { alert("Data fetch error for templates."); }
+            } catch (err) { alert("Data fetch error."); }
             showLoader(false);
         }
 
@@ -437,7 +470,7 @@
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
                 openModal('messageModal');
-            } catch (err) { alert("Failed to generate invite."); }
+            } catch (err) { alert("Invite generation error."); }
             showLoader(false);
         }
 
@@ -445,34 +478,33 @@
             const row = filteredData[idx];
             const job = fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0];
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing candidate fitment...</div>`;
+            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing...</div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Candidate"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
+                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Record"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
             } catch (err) { document.getElementById('aiContent').innerText = "AI Service Unavailable."; }
         }
 
-        // --- UI HELPERS ---
+        // --- NAVIGATION HELPERS ---
         function handleFilter() {
             const q = document.getElementById('globalSearch').value.toLowerCase();
-            const key = currentTab.toLowerCase().replace(/ /g, '_');
-            const base = fullData[key] || [];
-            filteredData = base.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
+            renderUI();
+            if (q) filteredData = filteredData.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
             renderTable();
         }
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
-        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Message copied to clipboard!"); }
+        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied!"); }
         async function testConnection() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Found " + (res.jobs?.length || 0) + " openings.");
-            } catch (e) { alert("❌ Connection failed. Check Web App URL."); }
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Found " + (res.jobs?.length || 0) + " jobs.");
+            } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
         function resetApp() { resetNavigation(); switchTab('Job Board'); }
