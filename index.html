@@ -48,6 +48,19 @@
         .data-stack-sub { color: #64748b; font-size: 10px; }
         .data-stack-brand { color: var(--odoo-purple); font-weight: 600; font-size: 10px; }
         .data-stack-emerald { color: #059669; font-weight: 700; }
+
+        select.status-dropdown {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            outline: none;
+        }
+        select.status-dropdown:focus { border-color: var(--odoo-teal); }
     </style>
 </head>
 <body class="main-viewport">
@@ -78,7 +91,7 @@
             </nav>
         </div>
         <div class="ml-auto flex items-center gap-3">
-            <button onclick="syncWebsiteApplications()" class="text-[9px] font-bold bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1 hover:bg-emerald-700 shadow-md">
+            <button onclick="syncWebsiteApplications()" class="text-[9px] font-bold bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1 hover:bg-emerald-700 shadow-md transition-all">
                 <i class="ph ph-arrows-clockwise"></i> Sync Website
             </button>
             <div class="h-6 w-[1px] bg-white/20"></div>
@@ -242,7 +255,7 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message || "Website Applicants Synced to CRM Candidates Sheet.");
+                alert(res.message || "Website Applicants Synced Successfully.");
                 switchTab('Candidates');
                 refreshData();
             } catch (err) { alert("Sync failed."); }
@@ -304,7 +317,6 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            const firstRow = filteredData[0];
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
             const isSourcedView = (currentTab === 'Sourced');
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
@@ -313,16 +325,18 @@
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             
             if (isCandidatesView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-64'>Notice & Location</th><th class='w-24 text-center'>Docs</th>`;
+                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-64'>Notice & Location</th><th class='w-24 text-center'>CV</th>`;
             } else if (isSourcedView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Experience</th><th class='w-40'>CTC Range</th><th class='w-32'>Status</th><th class='w-32'>Sourced On</th>`;
+                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Current Status</th><th class='w-32'>Sourced On</th>`;
             } else if (isJobBoard) {
                 headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
             } else if (isInterviews) {
                 headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-40'>Next Step</th>`;
             } else if (currentTab === 'Clients') {
-                headerHtml += `<th class='w-24'>ID</th><th class='w-56'>Company Name</th><th class='w-64'>Contact Info</th><th class='w-64'>Address & Website</th><th class='w-32'>Status</th>`;
+                const firstRow = filteredData[0];
+                Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             } else {
+                const firstRow = filteredData[0];
                 Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
@@ -354,12 +368,6 @@
                     bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME}</div><div class='data-stack-sub'>${row.POSITION_TITLE}</div></td>`;
                     bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE} @ ${row.INTERVIEW_TIME}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE}</div></td>`;
                     bRow += `<td><div class='data-stack-sub font-bold'>${row.NEXT_STEP || '--'}</div></td>`;
-                } else if (currentTab === 'Clients') {
-                    bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.CLIENT_ID}</td>`;
-                    bRow += `<td class='data-stack-title'>${row.COMPANY_NAME}</td>`;
-                    bRow += `<td><div class='font-bold text-slate-700'>${row.CONTACT_NAME || '--'}</div><div class='data-stack-sub'>${row.EMAIL}</div><div class='data-stack-brand'>${row.PHONE}</div></td>`;
-                    bRow += `<td><div class='data-stack-sub truncate'>${row.ADDRESS || '--'}</div><div class='text-[9px] text-blue-500 font-bold'>${row.WEBSITE || '--'}</div></td>`;
-                    bRow += `<td>${renderValue('CLIENT_STATUS', row.CLIENT_STATUS)}</td>`;
                 } else {
                     Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 }
@@ -385,14 +393,19 @@
             let html = `<td class="font-mono text-[10px] text-slate-400 uppercase">${jobId}</td>`;
             html += `<td><div class="font-bold text-slate-900 leading-tight">${name}</div><div class="text-[10px] text-slate-400">${email}</div><div class="text-[10px] text-[#714B67] font-bold">${phone}</div></td>`;
             html += `<td><div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div><div class="text-[9px] text-slate-400 uppercase font-bold">${jobId}</div></td>`;
-            html += `<td><div class="text-slate-600 font-medium">Total: ${totalExp}</div><div class="text-[10px] text-slate-400 italic">Rel: ${relExp}</div></td>`;
-            html += `<td><div class="text-emerald-700 font-bold">Exp: ${expCtc}</div><div class="text-[9px] text-slate-400">Curr: ${curCtc}</div></td>`;
             
             if (type === 'Candidates') {
+                html += `<td><div class="text-slate-600 font-medium">Total: ${totalExp}</div><div class="text-[10px] text-slate-400 italic">Rel: ${relExp}</div></td>`;
+                html += `<td><div class="text-emerald-700 font-bold">Exp: ${expCtc}</div><div class="text-[9px] text-slate-400">Curr: ${curCtc}</div></td>`;
                 html += `<td><div class="text-slate-600 font-medium">${row.NOTICE_PERIOD || '--'}</div><div class="text-[10px] text-slate-400">${row.CURRENT_LOCATION || row.LOCATION || '--'}</div></td>`;
                 html += `<td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">CV</a>` : '--'}</td>`;
             } else {
-                html += `<td>${renderValue('STATUS', row.STATUS)}</td>`;
+                // Sourced View logic - Dropdown Status
+                const status = row.STATUS || 'New';
+                const opts = ['New', 'Contacted', 'Applied', 'Not interested', 'No reply'];
+                html += `<td><select class="status-dropdown" onchange="event.stopPropagation()">
+                            ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
+                         </select></td>`;
                 html += `<td class="text-slate-400 font-bold text-[10px]">${date}</td>`;
             }
             return html;
@@ -419,6 +432,9 @@
                 html += `<button onclick="compose('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-500" title="Email JD"><i class="ph ph-envelope-simple text-base"></i></button>`;
             } else if (currentTab === 'Clients') {
                 html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WA Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+            } else if (currentTab === 'Dashboard and Billing') {
+                html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="Payment Reminder WA"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('BILLING_REMINDER_EMAIL', ${i})" class="action-btn text-indigo-500" title="Payment Reminder Email"><i class="ph ph-envelope-simple text-base"></i></button>`;
             } else {
                 html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
                 html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
@@ -431,24 +447,27 @@
             showLoader(true);
             const row = filteredData[idx];
             try {
-                const rowData = { ...row, 
-                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS,
-                    LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC,
-                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION
+                // Precise mapping for POSITION_TITLE to fix placeholders
+                const rowData = { 
+                    ...row, 
+                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || '--',
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || 'N/A',
+                    LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC || 'N/A',
+                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION || 'N/A'
                 };
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
-                document.getElementById('emailSubject').innerText = res.subject;
+                document.getElementById('emailSubject').innerText = res.subject || "Follow Up";
                 document.getElementById('messageBody').value = res.message;
                 const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
-                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject || "Update")}&body=${encodeURIComponent(res.message)}`, '_blank');
                 openModal('messageModal');
-            } catch (err) { alert("Message fetch error."); }
+            } catch (err) { alert("Message mapping error."); }
             showLoader(false);
         }
 
@@ -477,12 +496,17 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
+                const row = filteredData[activeRowIdx];
+                const rowData = { 
+                    ...row, 
+                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || '--'
+                };
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: rowData, overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
                 openModal('messageModal');
-            } catch (err) { alert("Error."); }
+            } catch (err) { alert("Interview data flow error."); }
             showLoader(false);
         }
 
@@ -490,11 +514,11 @@
             const row = filteredData[idx];
             const job = fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0];
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing...</div>`;
+            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing fitment...</div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || row.CANDIDATE_SOURCED}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
+                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Candidate"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
             } catch (err) { document.getElementById('aiContent').innerText = "AI Offline."; }
         }
 
@@ -514,7 +538,7 @@
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data flow verified.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database state synced.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
