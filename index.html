@@ -22,12 +22,11 @@
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
-        /* Fixed visibility issue by using standard CSS instead of @apply */
         #loader { 
             display: none; 
             position: fixed; 
             inset: 0; 
-            background: rgba(255,255,255,0.9); 
+            background: rgba(255,255,255,0.95); 
             z-index: 9999; 
             align-items: center; 
             justify-content: center; 
@@ -39,11 +38,10 @@
         
         .logo-img { height: 28px; width: 28px; object-fit: contain; border-radius: 4px; background: white; }
         
-        /* Modal standard CSS */
         .modal-overlay { 
             position: fixed; 
             inset: 0; 
-            background-color: rgba(15, 23, 42, 0.4); 
+            background-color: rgba(15, 23, 42, 0.5); 
             backdrop-filter: blur(4px); 
             z-index: 1000; 
             display: none; 
@@ -54,14 +52,14 @@
         .modal-overlay.open { display: flex; }
         
         .action-btn { 
-            padding: 0.375rem; 
+            padding: 0.4rem; 
             border-radius: 0.375rem; 
             transition: all 0.2s; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
         }
-        .action-btn:hover { transform: scale(1.1); background-color: #f8fafc; }
+        .action-btn:hover { transform: scale(1.15); background-color: #f1f5f9; }
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -108,7 +106,7 @@
     </div>
 
     <div class="flex-1 overflow-auto bg-white scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed min-w-[2500px]">
+        <table class="odoo-table w-full text-left table-fixed min-w-[3000px]">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
@@ -118,13 +116,51 @@
         </div>
     </div>
 
+    <!-- Interview Scheduler Modal -->
+    <div id="interviewModal" class="modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all">
+            <div class="p-5 border-b bg-indigo-50 flex items-center justify-between">
+                <h3 class="font-bold text-indigo-800 text-sm">Schedule Interview</h3>
+                <button onclick="closeModal('interviewModal')" class="p-2 hover:bg-white rounded-full transition-all"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Date</label>
+                        <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Time</label>
+                        <input type="time" id="intTime" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Format</label>
+                    <select id="intFormat" onchange="updateInterviewLocLabel()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold">
+                        <option value="Google Meet">Google Meet</option>
+                        <option value="Telephonic">Telephonic Interview</option>
+                        <option value="F2F">Face to Face (F2F)</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="intLocLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Meeting Link</label>
+                    <input type="text" id="intLocation" placeholder="https://meet.google.com/..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                </div>
+            </div>
+            <div class="p-5 bg-slate-50 border-t flex justify-end gap-3">
+                <button onclick="closeModal('interviewModal')" class="text-[11px] font-bold text-slate-500 px-4">Cancel</button>
+                <button onclick="generateInterviewInvite()" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest shadow-lg shadow-indigo-100">Prepare Invite</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Message Composer Modal -->
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all">
             <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
                 <div>
                     <h3 id="modalTitle" class="font-bold text-slate-800 text-sm">Message Preview</h3>
-                    <p id="modalSubtitle" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Generating enriched content...</p>
+                    <p id="modalSubtitle" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Enriched Preview</p>
                 </div>
                 <button onclick="closeModal('messageModal')" class="p-2 hover:bg-slate-200 rounded-full transition-all"><i class="ph ph-x text-xl text-slate-400"></i></button>
             </div>
@@ -135,7 +171,7 @@
                 </div>
                 <div>
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
-                    <textarea id="messageBody" class="w-full h-72 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-inner"></textarea>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-inner"></textarea>
                 </div>
             </div>
             <div class="p-5 bg-slate-50 border-t flex items-center justify-between">
@@ -157,10 +193,10 @@
     <!-- AI Sidebar -->
     <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l flex flex-col">
         <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
-            <h3 class="font-bold text-teal-700 text-xs flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Fitment Analysis</h3>
+            <h3 class="font-bold text-teal-700 text-xs flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Analysis</h3>
             <button onclick="closeAi()"><i class="ph ph-x text-xl text-slate-400"></i></button>
         </div>
-        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm leading-relaxed text-slate-600 italic">Select a candidate to run Gemini analysis...</div>
+        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm leading-relaxed text-slate-600 italic">Select a record...</div>
     </div>
 
     <div id="loader">
@@ -170,17 +206,15 @@
 
     <script>
         // REPLACE THIS with your Apps Script Web App URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbxHOGgTxc62171a5nGXQNgmKrfDH2q4VBkPy_KNv-CBLQWo2gi5B_yk5wADDIabPqSf/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzkiHVsgG6nIIgitESrBdF0WGCbifyxWwNYJXAzcf5_-tRSI_MFO-AeQFXi4eo1iFMi/exec"; 
         
         let currentView = 'Job Board';
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
         let filteredData = [];
+        let activeRecordIdx = null;
 
         async function init() {
-            if (API_URL.includes("PASTE_YOUR")) {
-                console.warn("API URL not configured.");
-                return;
-            }
+            if (API_URL.includes("PASTE_YOUR")) return;
             refreshData();
         }
 
@@ -188,10 +222,9 @@
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
-                const res = await resp.json();
-                fullData = res;
+                fullData = await resp.json();
                 switchView(currentView);
-            } catch (err) { console.error("Data fetch error:", err); }
+            } catch (err) { console.error("Data Sync error:", err); }
             showLoader(false);
         }
 
@@ -200,7 +233,7 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message || "Sync triggered successfully.");
+                alert(res.message || "Sync complete.");
                 refreshData();
             } catch (err) { alert("Sync failed."); }
             showLoader(false);
@@ -213,14 +246,7 @@
             const map = { 'Job Board': 'tab-jobs', 'Sourced': 'tab-sourced', 'Candidates': 'tab-candidates', 'Interview Tracker': 'tab-interviews', 'Clients': 'tab-clients', 'Dashboard and Billing': 'tab-billing' };
             if(map[view]) document.getElementById(map[view]).classList.add('active-tab');
 
-            const sourceMap = { 
-                'Job Board': fullData.jobs, 
-                'Sourced': fullData.sourced, 
-                'Candidates': fullData.candidates, 
-                'Interview Tracker': fullData.interviews, 
-                'Clients': fullData.clients, 
-                'Dashboard and Billing': fullData.billing 
-            };
+            const sourceMap = { 'Job Board': fullData.jobs, 'Sourced': fullData.sourced, 'Candidates': fullData.candidates, 'Interview Tracker': fullData.interviews, 'Clients': fullData.clients, 'Dashboard and Billing': fullData.billing };
             filteredData = Array.isArray(sourceMap[view]) ? sourceMap[view] : [];
             renderTable();
         }
@@ -243,24 +269,24 @@
                     'RELEVANT_EXPERIENCE', 'CURRENT_CTC', 'EXPECTED_CTC', 'NOTICE_PERIOD', 
                     'INTERVIEW_TELEPHONIC', 'INTERVIEW_F2F', 'CURRENT_LOCATION', 'RESUME_LINK', 'SUBMITTED_DATE'
                 ],
-                'Interview Tracker': ['INTERVIEW_ID', 'CANDIDATE_NAME', 'COMPANY_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'],
-                'Clients': ['CLIENT_ID', 'COMPANY_NAME', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'WEBSITE', 'CLIENT_STATUS'],
-                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE']
+                'Interview Tracker': ['INTERVIEW_ID', 'CANDIDATE_ID', 'CLIENT_ID', 'CANDIDATE_NAME', 'COMPANY_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'],
+                'Clients': ['CLIENT_ID', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'COMPANY_NAME', 'WEBSITE', 'ASSIGNED_JOBS_COUNT', 'ADDRESS', 'CLIENT_STATUS'],
+                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'PERCENTAGE_COMMISSION', 'CTC_CANDIDATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE']
             };
 
             const cols = columnConfig[currentView] || Object.keys(filteredData[0]).filter(k => !k.startsWith('_')).slice(0, 10);
             
             let hRow = "<tr><th class='w-12 px-4'><input type='checkbox'></th>";
             cols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
-            hRow += "<th class='text-right px-6 sticky right-0 bg-slate-50'>Quick Actions</th></tr>";
+            hRow += "<th class='text-right px-6 sticky right-0 bg-slate-50'>Actions</th></tr>";
             head.innerHTML = hRow;
 
             filteredData.forEach((row, i) => {
-                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50">`;
+                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${currentView === 'Clients' ? `drillDownClient('${row.CLIENT_ID}')` : ''}">`;
                 bRow += `<td class='px-4'><input type='checkbox'></td>`;
                 cols.forEach(c => bRow += `<td>${formatVal(c, row[c])}</td>`);
-                bRow += `<td class="text-right px-6 shrink-0 sticky right-0 bg-white shadow-[-4px_0_10px_rgba(0,0,0,0.02)] group-hover:bg-slate-50">
-                            <div class="flex items-center justify-end gap-2">${getActionButtons(row, i)}</div>
+                bRow += `<td class="text-right px-6 shrink-0 sticky right-0 bg-white shadow-[-4px_0_10px_rgba(0,0,0,0.02)]">
+                            <div class="flex items-center justify-end gap-1.5" onclick="event.stopPropagation()">${getActionButtons(row, i)}</div>
                          </td></tr>`;
                 body.innerHTML += bRow;
             });
@@ -273,21 +299,57 @@
                 html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-600" title="Email JD"><i class="ph ph-envelope-simple text-lg"></i></button>`;
                 html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-lg"></i></button>`;
                 html += `<button onclick="composeMessage('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit to Client"><i class="ph ph-user-circle-plus text-lg"></i></button>`;
+                html += `<button onclick="openInterviewScheduler(${i})" class="action-btn text-indigo-400" title="Schedule Interview"><i class="ph ph-calendar-plus text-lg"></i></button>`;
             } else if (currentView === 'Interview Tracker') {
                 html += `<button onclick="composeMessage('CANDIDATE_STATUS_UPDATE_WA', ${i})" class="action-btn text-emerald-600" title="Send Update"><i class="ph ph-chat-centered-dots text-lg"></i></button>`;
             } else if (currentView === 'Job Board') {
-                html += `<button onclick="composeMessage('CANDIDATE_COLD_OUTREACH_WA', ${i})" class="action-btn text-indigo-600" title="Outreach"><i class="ph ph-paper-plane-tilt text-lg"></i></button>`;
+                html += `<button onclick="composeMessage('CANDIDATE_COLD_OUTREACH_WA', ${i})" class="action-btn text-emerald-600" title="Cold Outreach"><i class="ph ph-paper-plane-tilt text-lg"></i></button>`;
             }
             return html;
         }
 
-        async function composeMessage(key, idx) {
+        function openInterviewScheduler(idx) {
+            activeRecordIdx = idx;
+            document.getElementById('intDate').valueAsDate = new Date();
+            document.getElementById('intTime').value = "10:00";
+            updateInterviewLocLabel();
+            openModal('interviewModal');
+        }
+
+        function updateInterviewLocLabel() {
+            const format = document.getElementById('intFormat').value;
+            const label = document.getElementById('intLocLabel');
+            const input = document.getElementById('intLocation');
+            if (format === 'Google Meet') {
+                label.innerText = "Meeting Link";
+                input.value = "https://meet.google.com/vcj-dfaf-pcc";
+            } else if (format === 'Telephonic') {
+                label.innerText = "Phone Number";
+                input.value = filteredData[activeRecordIdx]?.PHONE || "";
+            } else {
+                label.innerText = "Office Address";
+                input.value = "Kalyan Nagar, Bangalore";
+            }
+        }
+
+        function generateInterviewInvite() {
+            const overrides = {
+                INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+                INTERVIEW_TIME: document.getElementById('intTime').value,
+                INTERVIEW_MODE: document.getElementById('intFormat').value,
+                INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
+            };
+            closeModal('interviewModal');
+            composeMessage('INTERVIEW_INVITATION_WA', activeRecordIdx, overrides);
+        }
+
+        async function composeMessage(key, idx, overrides = {}) {
             showLoader(true);
             const rowData = filteredData[idx];
             try {
                 const resp = await fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData })
+                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData, overrides: overrides })
                 });
                 const res = await resp.json();
                 
@@ -312,8 +374,15 @@
                 };
 
                 openModal('messageModal');
-            } catch (err) { alert("Template Engine Error."); }
+            } catch (err) { alert("Message failed to generate."); }
             showLoader(false);
+        }
+
+        function drillDownClient(clientId) {
+            currentView = 'Job Board';
+            document.getElementById('breadcrumb').innerText = `CRM / Clients / ${clientId}`;
+            filteredData = fullData.jobs.filter(j => j.CLIENT_ID === clientId);
+            renderTable();
         }
 
         function formatVal(k, v) {
@@ -337,12 +406,12 @@
             const record = filteredData[idx];
             let job = currentView === 'Job Board' ? record : (fullData.jobs.find(j => j.JOB_ID === record.JOB_ID) || fullData.jobs[0] || {});
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-4"></div><p class="text-[10px] uppercase font-bold text-slate-400">Gemini Processing...</p></div>`;
+            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-4"></div><p class="text-[10px] uppercase font-bold text-slate-400">Gemini Ranker...</p></div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: record, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest">Professional Fitment: ${job.POSITION_TITLE || "Target Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed">${res.analysis}</div>`;
-            } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">Analysis Error.</div>`; }
+                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest">Fitment Analysis: ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed">${res.analysis}</div>`;
+            } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">Error.</div>`; }
         }
 
         function handleSearch() {
@@ -371,8 +440,7 @@
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
                 alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data flow verified.");
-                if(!res.error) refreshData();
-            } catch (e) { alert("❌ Backend Unreachable."); }
+            } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
         window.onload = init;
