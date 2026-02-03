@@ -10,59 +10,26 @@
     <style>
         body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; color: #495057; overflow: hidden; }
         :root { --odoo-purple: #714B67; --odoo-teal: #00A09D; --odoo-border: #dee2e6; }
-        
         .odoo-header { background-color: var(--odoo-purple); color: white; }
-        .btn-primary { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 6px 12px; font-weight: 500; font-size: 13px; transition: all 0.2s; border: none; cursor: pointer; }
-        .btn-primary:hover { filter: brightness(1.1); }
-        
+        .btn-primary { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 6px 12px; font-weight: 500; font-size: 13px; border: none; cursor: pointer; }
         .odoo-table thead { background-color: #f1f3f5; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
         .odoo-table th { padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid var(--odoo-border); white-space: nowrap; }
-        .odoo-table td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #f1f3f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid #f8f9fa; }
+        .odoo-table td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #f1f3f5; white-space: nowrap; border-right: 1px solid #f8f9fa; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
-        
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
-        #loader { 
-            display: none; 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(255,255,255,0.95); 
-            z-index: 9999; 
-            align-items: center; 
-            justify-content: center; 
-            flex-direction: column;
-        }
-        
+        /* Layering Fixes */
+        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-teal); border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
         .logo-img { height: 28px; width: 28px; object-fit: contain; border-radius: 4px; background: white; }
-        
-        .modal-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background-color: rgba(15, 23, 42, 0.5); 
-            backdrop-filter: blur(4px); 
-            z-index: 1000; 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 1rem;
-        }
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.open { display: flex; }
-        
-        .action-btn { 
-            padding: 0.4rem; 
-            border-radius: 0.375rem; 
-            transition: all 0.2s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
+        .action-btn { padding: 0.4rem; border-radius: 0.375rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .action-btn:hover { transform: scale(1.15); background-color: #f1f5f9; }
-        
+        .breadcrumb-item:hover { color: var(--odoo-teal); cursor: pointer; text-decoration: underline; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -83,20 +50,21 @@
             </nav>
         </div>
         <div class="ml-auto flex items-center gap-3">
-            <button onclick="syncWebsiteForm()" class="text-[10px] font-black bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1.5 shadow-sm hover:bg-emerald-700 transition-all">
+            <button onclick="syncWebsiteForm()" class="text-[10px] font-black bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1.5 hover:bg-emerald-700 transition-all">
                 <i class="ph ph-arrows-clockwise"></i> Sync Website
             </button>
-            <div class="h-6 w-[1px] bg-white/20"></div>
             <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-2 py-1 rounded hover:bg-white/20 transition-all">Test</button>
         </div>
     </header>
 
     <div class="bg-white py-2 px-6 flex items-center justify-between border-b shrink-0">
         <div class="flex flex-col">
-            <nav class="text-[9px] font-black text-slate-400 uppercase mb-1">CRM / <span id="breadcrumb" class="text-slate-700 font-bold tracking-widest uppercase">Job Board</span></nav>
-            <div class="flex items-center gap-2">
+            <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <span class="breadcrumb-item" onclick="resetDrillDown()">CRM</span> / <span id="currentTabName">Job Board</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1">
                 <button onclick="refreshData()" class="btn-primary uppercase tracking-tighter">Refresh Sync</button>
-                <button class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200 uppercase tracking-tighter" onclick="window.open('https://docs.google.com/spreadsheets/d/1VTdu7j25g0h-IUm6-cjwhCB0WXWgdgToJRwr9ZC4628/edit', '_blank')">Database Sheet</button>
+                <button id="backBtn" onclick="resetDrillDown()" class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200 uppercase tracking-tighter hidden">Back</button>
             </div>
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all">
@@ -106,7 +74,7 @@
     </div>
 
     <div class="flex-1 overflow-auto bg-white scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed min-w-[3000px]">
+        <table class="odoo-table w-full text-left table-fixed">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
@@ -116,73 +84,72 @@
         </div>
     </div>
 
-    <!-- Interview Scheduler Modal -->
+    <!-- Modals -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all">
             <div class="p-5 border-b bg-indigo-50 flex items-center justify-between">
                 <h3 class="font-bold text-indigo-800 text-sm">Schedule Interview</h3>
-                <button onclick="closeModal('interviewModal')" class="p-2 hover:bg-white rounded-full transition-all"><i class="ph ph-x text-xl"></i></button>
+                <button onclick="closeModal('interviewModal')" class="p-2 hover:bg-white rounded-full transition-all"><i class="ph ph-x text-xl text-slate-400"></i></button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 text-left">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Date</label>
-                        <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm outline-none">
                     </div>
                     <div>
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Time</label>
-                        <input type="time" id="intTime" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <input type="time" id="intTime" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm outline-none">
                     </div>
                 </div>
                 <div>
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Format</label>
-                    <select id="intFormat" onchange="updateInterviewLocLabel()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold">
+                    <select id="intFormat" onchange="updateIntLocLabel()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm font-bold outline-none">
                         <option value="Google Meet">Google Meet</option>
                         <option value="Telephonic">Telephonic Interview</option>
                         <option value="F2F">Face to Face (F2F)</option>
                     </select>
                 </div>
                 <div>
-                    <label id="intLocLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Meeting Link</label>
-                    <input type="text" id="intLocation" placeholder="https://meet.google.com/..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <label id="intLocLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Meeting Link / Address</label>
+                    <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm outline-none">
                 </div>
             </div>
             <div class="p-5 bg-slate-50 border-t flex justify-end gap-3">
-                <button onclick="closeModal('interviewModal')" class="text-[11px] font-bold text-slate-500 px-4">Cancel</button>
-                <button onclick="generateInterviewInvite()" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest shadow-lg shadow-indigo-100">Prepare Invite</button>
+                <button onclick="closeModal('interviewModal')" class="text-[11px] font-bold text-slate-500">Cancel</button>
+                <button onclick="generateIntInvite()" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest shadow-lg shadow-indigo-100">Create Invite</button>
             </div>
         </div>
     </div>
 
-    <!-- Message Composer Modal -->
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all">
             <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
                 <div>
-                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm">Message Preview</h3>
-                    <p id="modalSubtitle" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Enriched Preview</p>
+                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
+                    <p id="modalSubtitle" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Hub</p>
                 </div>
                 <button onclick="closeModal('messageModal')" class="p-2 hover:bg-slate-200 rounded-full transition-all"><i class="ph ph-x text-xl text-slate-400"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <div id="emailSubjectContainer">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
-                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block text-left">Subject Line</label>
+                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700 text-left"></div>
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
-                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-inner"></textarea>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block text-left">Message Body</label>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none"></textarea>
                 </div>
             </div>
             <div class="p-5 bg-slate-50 border-t flex items-center justify-between">
-                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-teal-600 uppercase tracking-widest flex items-center gap-2 transition-colors">
-                    <i class="ph ph-copy text-lg"></i> Copy Message
+                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-teal-600 uppercase tracking-widest flex items-center gap-2">
+                    <i class="ph ph-copy text-lg"></i> Copy
                 </button>
                 <div class="flex gap-2">
-                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-lg shadow-emerald-100">
                         <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
                     </button>
-                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
                         <i class="ph ph-envelope text-lg"></i> Email
                     </button>
                 </div>
@@ -196,12 +163,12 @@
             <h3 class="font-bold text-teal-700 text-xs flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Analysis</h3>
             <button onclick="closeAi()"><i class="ph ph-x text-xl text-slate-400"></i></button>
         </div>
-        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm leading-relaxed text-slate-600 italic">Select a record...</div>
+        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm text-left leading-relaxed text-slate-600 italic">Select record...</div>
     </div>
 
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] animate-pulse">Synchronizing Intelligence</p>
+        <p class="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] animate-pulse">Syncing Database</p>
     </div>
 
     <script>
@@ -211,7 +178,7 @@
         let currentView = 'Job Board';
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
         let filteredData = [];
-        let activeRecordIdx = null;
+        let activeIdx = null;
 
         async function init() {
             if (API_URL.includes("PASTE_YOUR")) return;
@@ -224,7 +191,7 @@
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 fullData = await resp.json();
                 switchView(currentView);
-            } catch (err) { console.error("Data Sync error:", err); }
+            } catch (err) { console.error("Sync Error:", err); }
             showLoader(false);
         }
 
@@ -233,18 +200,19 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message || "Sync complete.");
+                alert(res.message);
                 refreshData();
-            } catch (err) { alert("Sync failed."); }
+            } catch (err) { alert("Sync Error."); }
             showLoader(false);
         }
 
         function switchView(view) {
             currentView = view;
-            document.getElementById('breadcrumb').innerText = view;
+            document.getElementById('currentTabName').innerText = view;
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab'));
             const map = { 'Job Board': 'tab-jobs', 'Sourced': 'tab-sourced', 'Candidates': 'tab-candidates', 'Interview Tracker': 'tab-interviews', 'Clients': 'tab-clients', 'Dashboard and Billing': 'tab-billing' };
             if(map[view]) document.getElementById(map[view]).classList.add('active-tab');
+            document.getElementById('backBtn').classList.add('hidden');
 
             const sourceMap = { 'Job Board': fullData.jobs, 'Sourced': fullData.sourced, 'Candidates': fullData.candidates, 'Interview Tracker': fullData.interviews, 'Clients': fullData.clients, 'Dashboard and Billing': fullData.billing };
             filteredData = Array.isArray(sourceMap[view]) ? sourceMap[view] : [];
@@ -260,21 +228,13 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            const columnConfig = {
-                'Job Board': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'JOB_STATUS', 'LOCATION', 'EXPERIENCE_REQUIRED', 'CTC_RANGE', 'OPENINGS_COUNT', 'PIPELINE'],
-                'Sourced': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'CANDIDATE_SOURCED', 'STATUS', 'OUTREACH_DATE', 'SOURCED_EMAIL', 'SOURCED_PHONE'],
-                'Candidates': [
-                    'JOB_ID', 'APP_ID', 'CLIENT_ID', 'JOB_TITLE', 'JOB_LOCATION', 'CURRENT_STATUS', 
-                    'CANDIDATE_NAME', 'PHONE', 'EMAIL', 'EDUCATION', 'TOTAL_EXPERIENCE', 
-                    'RELEVANT_EXPERIENCE', 'CURRENT_CTC', 'EXPECTED_CTC', 'NOTICE_PERIOD', 
-                    'INTERVIEW_TELEPHONIC', 'INTERVIEW_F2F', 'CURRENT_LOCATION', 'RESUME_LINK', 'SUBMITTED_DATE'
-                ],
-                'Interview Tracker': ['INTERVIEW_ID', 'CANDIDATE_ID', 'CLIENT_ID', 'CANDIDATE_NAME', 'COMPANY_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'],
-                'Clients': ['CLIENT_ID', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'COMPANY_NAME', 'WEBSITE', 'ASSIGNED_JOBS_COUNT', 'ADDRESS', 'CLIENT_STATUS'],
-                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'PERCENTAGE_COMMISSION', 'CTC_CANDIDATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE']
-            };
-
-            const cols = columnConfig[currentView] || Object.keys(filteredData[0]).filter(k => !k.startsWith('_')).slice(0, 10);
+            // Header selection logic
+            let cols = [];
+            if (currentView === 'Candidates') {
+                cols = ['JOB_ID', 'APP_ID', 'CLIENT_ID', 'JOB_TITLE', 'JOB_LOCATION', 'CURRENT_STATUS', 'CANDIDATE_NAME', 'PHONE', 'EMAIL', 'EDUCATION', 'TOTAL_EXPERIENCE', 'RELEVANT_EXPERIENCE', 'CURRENT_CTC', 'EXPECTED_CTC', 'NOTICE_PERIOD', 'INTERVIEW_TELEPHONIC', 'INTERVIEW_F2F', 'CURRENT_LOCATION', 'RESUME_LINK', 'SUBMITTED_DATE'];
+            } else {
+                cols = Object.keys(filteredData[0]).filter(k => !k.startsWith('_'));
+            }
             
             let hRow = "<tr><th class='w-12 px-4'><input type='checkbox'></th>";
             cols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
@@ -282,57 +242,64 @@
             head.innerHTML = hRow;
 
             filteredData.forEach((row, i) => {
-                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${currentView === 'Clients' ? `drillDownClient('${row.CLIENT_ID}')` : ''}">`;
-                bRow += `<td class='px-4'><input type='checkbox'></td>`;
+                let clickFn = '';
+                if (currentView === 'Clients') clickFn = `drillDownJobs('${row.CLIENT_ID}')`;
+                else if (currentView === 'Job Board') clickFn = `drillDownCandidates('${row.JOB_ID}')`;
+
+                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${clickFn}">`;
+                bRow += `<td class='px-4' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
                 cols.forEach(c => bRow += `<td>${formatVal(c, row[c])}</td>`);
                 bRow += `<td class="text-right px-6 shrink-0 sticky right-0 bg-white shadow-[-4px_0_10px_rgba(0,0,0,0.02)]">
-                            <div class="flex items-center justify-end gap-1.5" onclick="event.stopPropagation()">${getActionButtons(row, i)}</div>
+                            <div class="flex items-center justify-end gap-1.5" onclick="event.stopPropagation()">${getActions(row, i)}</div>
                          </td></tr>`;
                 body.innerHTML += bRow;
             });
         }
 
-        function getActionButtons(row, i) {
+        function drillDownJobs(clientId) {
+            filteredData = fullData.jobs.filter(j => j.CLIENT_ID === clientId);
+            document.getElementById('currentTabName').innerText = `Clients / ${clientId} / Jobs`;
+            document.getElementById('backBtn').classList.remove('hidden');
+            renderTable();
+        }
+
+        function drillDownCandidates(jobId) {
+            filteredData = fullData.candidates.filter(c => c.JOB_ID === jobId);
+            document.getElementById('currentTabName').innerText = `Jobs / ${jobId} / Candidates`;
+            document.getElementById('backBtn').classList.remove('hidden');
+            renderTable();
+        }
+
+        function resetDrillDown() { switchView(currentView); }
+
+        function getActions(row, i) {
             let html = `<button onclick="runAi(${i}, event)" class="action-btn text-teal-600" title="Gemini Analysis"><i class="ph ph-sparkle-fill text-lg"></i></button>`;
-            
-            if (currentView === 'Candidates' || currentView === 'Sourced') {
-                html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-600" title="Email JD"><i class="ph ph-envelope-simple text-lg"></i></button>`;
-                html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-lg"></i></button>`;
-                html += `<button onclick="composeMessage('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit to Client"><i class="ph ph-user-circle-plus text-lg"></i></button>`;
-                html += `<button onclick="openInterviewScheduler(${i})" class="action-btn text-indigo-400" title="Schedule Interview"><i class="ph ph-calendar-plus text-lg"></i></button>`;
-            } else if (currentView === 'Interview Tracker') {
-                html += `<button onclick="composeMessage('CANDIDATE_STATUS_UPDATE_WA', ${i})" class="action-btn text-emerald-600" title="Send Update"><i class="ph ph-chat-centered-dots text-lg"></i></button>`;
-            } else if (currentView === 'Job Board') {
-                html += `<button onclick="composeMessage('CANDIDATE_COLD_OUTREACH_WA', ${i})" class="action-btn text-emerald-600" title="Cold Outreach"><i class="ph ph-paper-plane-tilt text-lg"></i></button>`;
+            if (currentView === 'Candidates' || currentView === 'Sourced' || currentView === 'Job Board') {
+                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-lg"></i></button>`;
+                html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit to Client"><i class="ph ph-user-circle-plus text-lg"></i></button>`;
+                html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Schedule Interview"><i class="ph ph-calendar-plus text-lg"></i></button>`;
             }
             return html;
         }
 
-        function openInterviewScheduler(idx) {
-            activeRecordIdx = idx;
+        function openIntModal(idx) {
+            activeIdx = idx;
             document.getElementById('intDate').valueAsDate = new Date();
             document.getElementById('intTime').value = "10:00";
-            updateInterviewLocLabel();
+            updateIntLocLabel();
             openModal('interviewModal');
         }
 
-        function updateInterviewLocLabel() {
-            const format = document.getElementById('intFormat').value;
-            const label = document.getElementById('intLocLabel');
-            const input = document.getElementById('intLocation');
-            if (format === 'Google Meet') {
-                label.innerText = "Meeting Link";
-                input.value = "https://meet.google.com/vcj-dfaf-pcc";
-            } else if (format === 'Telephonic') {
-                label.innerText = "Phone Number";
-                input.value = filteredData[activeRecordIdx]?.PHONE || "";
-            } else {
-                label.innerText = "Office Address";
-                input.value = "Kalyan Nagar, Bangalore";
-            }
+        function updateIntLocLabel() {
+            const fmt = document.getElementById('intFormat').value;
+            const lbl = document.getElementById('intLocLabel');
+            const inp = document.getElementById('intLocation');
+            if (fmt === 'Google Meet') { lbl.innerText = "Meeting Link"; inp.value = "https://meet.google.com/vcj-dfaf-pcc"; }
+            else if (fmt === 'Telephonic') { lbl.innerText = "Phone Number"; inp.value = filteredData[activeIdx]?.PHONE || filteredData[activeIdx]?.SOURCED_PHONE || ""; }
+            else { lbl.innerText = "Office Address"; inp.value = "Hiregrow Office, Kalyan Nagar, Bangalore"; }
         }
 
-        function generateInterviewInvite() {
+        function generateIntInvite() {
             const overrides = {
                 INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
                 INTERVIEW_TIME: document.getElementById('intTime').value,
@@ -340,49 +307,34 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             closeModal('interviewModal');
-            composeMessage('INTERVIEW_INVITATION_WA', activeRecordIdx, overrides);
+            compose('INTERVIEW_INVITATION_WA', activeIdx, overrides);
         }
 
-        async function composeMessage(key, idx, overrides = {}) {
+        async function compose(key, idx, overrides = {}) {
             showLoader(true);
-            const rowData = filteredData[idx];
+            const row = filteredData[idx];
             try {
                 const resp = await fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData, overrides: overrides })
+                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: row, overrides: overrides })
                 });
                 const res = await resp.json();
-                
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
-                document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME || rowData.Candidate_Name || "Record Preview";
-                
-                if (key.includes('WA')) {
-                    document.getElementById('emailSubjectContainer').style.display = 'none';
-                } else {
-                    document.getElementById('emailSubjectContainer').style.display = 'block';
-                    document.getElementById('emailSubject').innerText = res.subject;
-                }
-
+                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.Candidate_Name || "Record";
+                document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
+                document.getElementById('emailSubject').innerText = res.subject;
                 document.getElementById('messageBody').value = res.message;
-                const cleanPhone = (res.phone || "").toString().replace(/\D/g, '');
-                const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
                 
+                const rawPhone = (res.phone || "").toString().replace(/\D/g, '');
+                const waPhone = rawPhone.length === 10 ? '91' + rawPhone : rawPhone;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(res.message)}`, '_blank');
                 document.getElementById('emailActionBtn').onclick = () => {
-                    const recipient = rowData.EMAIL || rowData.Email || "";
-                    window.open(`mailto:${recipient}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+                    const email = row.EMAIL || row.Email || "";
+                    window.open(`mailto:${email}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
                 };
-
                 openModal('messageModal');
-            } catch (err) { alert("Message failed to generate."); }
+            } catch (err) { alert("Message error."); }
             showLoader(false);
-        }
-
-        function drillDownClient(clientId) {
-            currentView = 'Job Board';
-            document.getElementById('breadcrumb').innerText = `CRM / Clients / ${clientId}`;
-            filteredData = fullData.jobs.filter(j => j.CLIENT_ID === clientId);
-            renderTable();
         }
 
         function formatVal(k, v) {
@@ -403,14 +355,14 @@
 
         async function runAi(idx, e) {
             e.stopPropagation();
-            const record = filteredData[idx];
-            let job = currentView === 'Job Board' ? record : (fullData.jobs.find(j => j.JOB_ID === record.JOB_ID) || fullData.jobs[0] || {});
+            const row = filteredData[idx];
+            let job = currentView === 'Job Board' ? row : (fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0] || {});
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-4"></div><p class="text-[10px] uppercase font-bold text-slate-400">Gemini Ranker...</p></div>`;
+            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-4"></div><p class="text-[10px] uppercase font-bold text-slate-400">Gemini Thinking...</p></div>`;
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: record, jobData: job }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest">Fitment Analysis: ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed">${res.analysis}</div>`;
+                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest text-left">Fitment: ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed text-left">${res.analysis}</div>`;
             } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">Error.</div>`; }
         }
 
@@ -422,13 +374,7 @@
             renderTable();
         }
 
-        function copyMessage() {
-            const body = document.getElementById('messageBody');
-            body.select();
-            document.execCommand('copy');
-            alert("Copied to clipboard!");
-        }
-
+        function copyMessage() { const body = document.getElementById('messageBody'); body.select(); document.execCommand('copy'); alert("Copied!"); }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
@@ -439,8 +385,9 @@
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data flow verified.");
-            } catch (e) { alert("❌ Connection failed."); }
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database is live.");
+                if(!res.error) refreshData();
+            } catch (e) { alert("❌ Backend Unreachable."); }
             showLoader(false);
         }
         window.onload = init;
