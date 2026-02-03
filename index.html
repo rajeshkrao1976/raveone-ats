@@ -169,10 +169,10 @@
                     <i class="ph ph-copy text-lg"></i> Copy Text
                 </button>
                 <div class="flex gap-2">
-                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all">
                         <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
                     </button>
-                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md">
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md transition-all">
                         <i class="ph ph-envelope text-lg"></i> Email
                     </button>
                 </div>
@@ -236,6 +236,7 @@
                     method: 'POST', 
                     body: JSON.stringify({ action: 'updateStatus', sheet: sheetMap[currentTab], row: row._ROW, col: colName, value: value }) 
                 });
+                refreshData();
             } catch (e) { alert("Update failed."); }
         }
 
@@ -270,12 +271,14 @@
             } else {
                 if (currentTab === 'Dashboard and Billing') dataset = fullData.billing || [];
                 else if (currentTab === 'Interview Tracker') dataset = fullData.interviews || [];
-                else {
-                    const key = currentTab.toLowerCase().replace(/ /g, '_');
-                    dataset = fullData[key] || [];
-                }
+                else if (currentTab === 'Job Board') dataset = fullData.jobs || [];
+                else if (currentTab === 'Candidates') dataset = fullData.candidates || [];
+                else if (currentTab === 'Sourced') dataset = fullData.sourced || [];
+                else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
-            filteredData = dataset;
+            
+            // CLEAN BLANK ROWS: Filter out rows that are effectively empty (no IDs or names)
+            filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.INTERVIEW_ID);
             renderTable();
         }
 
@@ -288,6 +291,7 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
+            const firstRow = filteredData[0];
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
             const isSourcedView = (currentTab === 'Sourced');
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
@@ -304,7 +308,7 @@
             } else if (isInterviews) {
                 headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-40'>Next Step</th>`;
             } else {
-                Object.keys(filteredData[0]).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
+                Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
             headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions</th></tr>";
@@ -324,16 +328,16 @@
                     bRow += renderSourcedRow(row);
                 } else if (isJobBoard) {
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.JOB_ID}</td>`;
-                    bRow += `<td><div class='data-stack-title'>${row.POSITION_TITLE || row.TITLE}</div><div class='data-stack-sub'>${row.LOCATION}</div></td>`;
-                    bRow += `<td><div class='data-stack-brand'>${row.CLIENT_ID || row.COMPANY}</div></td>`;
-                    bRow += `<td><div class='font-medium text-slate-600'>Exp: ${row.EXPERIENCE_REQUIRED || row.MIN_EXPERIENCE}</div><div class='data-stack-sub'>Budget: ${row.CTC_RANGE || row.MIN_SALARY}</div></td>`;
+                    bRow += `<td><div class='data-stack-title'>${row.POSITION_TITLE || row.TITLE || '--'}</div><div class='data-stack-sub'>${row.LOCATION || '--'}</div></td>`;
+                    bRow += `<td><div class='data-stack-brand'>${row.CLIENT_ID || row.COMPANY || '--'}</div></td>`;
+                    bRow += `<td><div class='font-medium text-slate-600'>Exp: ${row.EXPERIENCE_REQUIRED || row.MIN_EXPERIENCE || '--'}</div><div class='data-stack-sub'>Budget: ${row.CTC_RANGE || row.MIN_SALARY || '--'}</div></td>`;
                     bRow += `<td>${renderValue('JOB_STATUS', row.JOB_STATUS || row.STATUS)}</td>`;
                     bRow += `<td class='text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
                 } else if (isInterviews) {
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td>`;
-                    bRow += `<td><div class='data-stack-title'>${row.CANDIDATE_NAME}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID}</div></td>`;
-                    bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME}</div><div class='data-stack-sub'>${row.POSITION_TITLE}</div></td>`;
-                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE} @ ${row.INTERVIEW_TIME}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE}</div></td>`;
+                    bRow += `<td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td>`;
+                    bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td>`;
+                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${row.INTERVIEW_TIME || '--'}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td>`;
                     bRow += `<td><div class='data-stack-sub font-bold'>${row.NEXT_STEP || '--'}</div></td>`;
                 } else {
                     Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
@@ -384,7 +388,7 @@
                 if (['rejected', 'cold', 'dropped', 'off', 'overdue', 'cancelled'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
                 return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
             }
-            if (key.includes('ctc') || key.includes('amount')) return `<span class="font-bold text-slate-800">₹${Number(v).toLocaleString()}</span>`;
+            if (key.includes('ctc') || key.includes('amount')) return `<span class="font-bold text-slate-800 tracking-tight">₹${Number(v).toLocaleString()}</span>`;
             return v;
         }
 
@@ -400,7 +404,7 @@
             } else {
                 html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
                 html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
-                html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
+                html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Schedule Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             }
             return html;
         }
@@ -458,7 +462,7 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides: overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
@@ -495,7 +499,7 @@
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database State Synced.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database state synced.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
