@@ -16,14 +16,13 @@
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
         /* High-Density Compact Table */
-        .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
         .odoo-table th { padding: 8px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; background: #f9fafb; }
         .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
-        /* Layout */
         .main-viewport { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
         .table-scroll-container { flex: 1; overflow: auto; background-color: white; border-top: 1px solid var(--odoo-border); }
         
@@ -44,21 +43,23 @@
         .data-stack-emerald { color: #059669; font-weight: 700; }
         
         .status-dropdown {
-            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%;
+            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%; outline: none;
         }
+        .status-dropdown:hover { border-color: var(--odoo-teal); }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
     </style>
 </head>
 <body class="main-viewport">
 
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Hiregrow State</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Hiregrow Logic</p>
     </div>
 
-    <!-- Top Navbar -->
+    <!-- Navigation Header -->
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-6 h-full">
             <div class="flex items-center gap-2 cursor-pointer" onclick="resetApp()">
@@ -82,15 +83,15 @@
                 <i class="ph ph-arrows-clockwise"></i> Sync Website
             </button>
             <div class="h-6 w-[1px] bg-white/20"></div>
-            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 uppercase transition-all">Test API</button>
+            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-all uppercase">Test Sync</button>
         </div>
     </header>
 
-    <!-- Subheader: Breadcrumbs & Search -->
+    <!-- Breadcrumbs -->
     <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col text-left">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <span class="breadcrumb-item" onclick="resetNavigation()">CRM</span> / <span id="currentPath">Job Board</span>
+                <span class="breadcrumb-item" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
             </div>
             <div class="flex items-center gap-2 mt-1">
                 <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase tracking-tighter text-[10px]">Live Refresh</button>
@@ -99,13 +100,13 @@
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
+            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Filter active records..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
-    <!-- Table Content Area -->
+    <!-- Table Container -->
     <div class="table-scroll-container">
-        <table class="odoo-table w-full text-left table-fixed min-w-[1600px]" id="dataTable">
+        <table class="odoo-table w-full text-left table-fixed min-w-[1400px]" id="dataTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
@@ -115,7 +116,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Interview Scheduler -->
+    <!-- Modals -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
@@ -153,29 +154,28 @@
         </div>
     </div>
 
-    <!-- MODAL: Message Preview -->
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
                 <div class="text-left">
                     <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase tracking-tighter">Preview</h3>
-                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Hub</p>
+                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Engine</p>
                 </div>
                 <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4 text-left">
                 <div id="emailSubjectContainer">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject</label>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
                     <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Body</label>
                     <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none shadow-inner"></textarea>
                 </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
                 <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-[#714B67] uppercase tracking-widest flex items-center gap-2 transition-all">
-                    <i class="ph ph-copy text-lg"></i> Copy Text
+                    <i class="ph ph-copy text-lg"></i> Copy Message
                 </button>
                 <div class="flex gap-2">
                     <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all">
@@ -206,7 +206,6 @@
             switchTab(currentTab);
         };
 
-        // Utility: Fixes "1899" epoch time from Google Sheets to HH:mm
         function formatSheetTime(val) {
             if (!val) return '--';
             const str = String(val);
@@ -240,14 +239,9 @@
         }
 
         async function updateStatus(row, colName, value) {
-            const sheetMap = { 
-                'Candidates': 'Candidates', 
-                'Sourced': 'Sourced', 
-                'Interview Tracker': 'Interview Tracker' 
-            };
+            const sheetMap = { 'Candidates': 'Candidates', 'Sourced': 'Sourced', 'Interview Tracker': 'Interview Tracker' };
             const sheetName = sheetMap[currentTab] || (drillDown.type === 'job-candidates' ? 'Candidates' : '');
             if (!sheetName) return;
-
             try {
                 await fetch(API_URL, { 
                     method: 'POST', 
@@ -269,8 +263,9 @@
         }
 
         function setDrillDown(type, id, label) { drillDown = { type, id, label }; renderUI(); }
-        function resetNavigation() { drillDown = { type: null, id: null, label: null }; renderUI(); }
         function drillBack() { resetNavigation(); }
+        function resetApp() { drillDown = { type: null, id: null, label: null }; renderUI(); }
+        function resetNavigation() { drillDown = { type: null, id: null, label: null }; renderUI(); }
 
         function renderUI() {
             document.getElementById('currentPath').innerText = currentTab;
@@ -294,7 +289,8 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT || r.JOINING_DATE);
+            // CLEAN DATA logic: Keep empty skeletons (marked with _IS_EMPTY) or rows with content
+            filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT);
             renderTable();
         }
 
@@ -324,14 +320,20 @@
             } else if (isInterviews) {
                 headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-48'>Next Step</th>`;
             } else if (isBilling) {
-                headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Payment Status</th>`;
+                headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Status</th>`;
             } else {
                 const firstRow = filteredData[0];
                 Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
-            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions</th></tr>";
+            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions Bar</th></tr>";
             head.innerHTML = headerHtml;
+
+            // Handle the "No records" body state if only skeleton exists
+            if (filteredData.length === 1 && filteredData[0]._IS_EMPTY) {
+                body.innerHTML = `<tr><td colspan="10" class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px]">No records in this sheet</td></tr>`;
+                return;
+            }
 
             filteredData.forEach((row, i) => {
                 let rowClick = '';
@@ -428,7 +430,8 @@
             } else if (currentTab === 'Clients') {
                 html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WA Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
             } else if (currentTab === 'Dashboard and Billing') {
-                html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="Reminder"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="WA Reminder"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('BILLING_REMINDER_EMAIL', ${i})" class="action-btn text-indigo-500" title="Email Reminder"><i class="ph ph-envelope-simple text-base"></i></button>`;
             } else {
                 html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
                 html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
@@ -445,23 +448,23 @@
                     ...row, 
                     POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || '--',
                     COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || '--',
-                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || 'N/A',
-                    LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC || 'N/A',
-                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION || 'N/A'
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '--',
+                    EXPECTED_CTC: row.EXPECTED_CTC || '--',
+                    CURRENT_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || '--'
                 };
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
-                document.getElementById('emailSubject').innerText = res.subject || "CRM Update";
+                document.getElementById('emailSubject').innerText = res.subject || "Portal Update";
                 document.getElementById('messageBody').value = res.message;
                 const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
-                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject || "Update")}&body=${encodeURIComponent(res.message)}`, '_blank');
+                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
                 openModal('messageModal');
-            } catch (err) { alert("Data flow failed."); }
+            } catch (err) { alert("Message rendering error."); }
             showLoader(false);
         }
 
@@ -490,25 +493,13 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides: overrides }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
                 openModal('messageModal');
-            } catch (err) { alert("Error."); }
+            } catch (err) { alert("Invite error."); }
             showLoader(false);
-        }
-
-        async function runAiRank(idx) {
-            const row = filteredData[idx];
-            const job = fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0];
-            document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing...</div>`;
-            try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
-                const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Candidate"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
-            } catch (err) { document.getElementById('aiContent').innerText = "AI Offline."; }
         }
 
         function handleFilter() {
@@ -520,14 +511,13 @@
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
         function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied!"); }
         async function testConnection() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database state synced.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data synced.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
