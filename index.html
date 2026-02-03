@@ -15,15 +15,13 @@
         .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
-        /* High-Density Compact Table */
+        /* Compact High-Density Table */
         .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
         .odoo-table th { padding: 8px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; background: #f9fafb; }
-        .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
+        .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
-        
-        /* Layout */
         .main-viewport { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
         .table-scroll-container { flex: 1; overflow: auto; background-color: white; border-top: 1px solid var(--odoo-border); }
         
@@ -37,7 +35,6 @@
         .action-btn { padding: 0.35rem; border-radius: 0.375rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .action-btn:hover { background-color: #f1f5f9; transform: scale(1.1); }
         
-        /* Compact Stacking Styles */
         .data-stack-title { font-weight: 700; color: #1e293b; font-size: 11px; margin-bottom: 1px; }
         .data-stack-sub { color: #64748b; font-size: 10px; }
         .data-stack-brand { color: var(--odoo-purple); font-weight: 600; font-size: 10px; }
@@ -46,11 +43,9 @@
         .status-dropdown {
             background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%; outline: none;
         }
-        .status-dropdown:hover { border-color: var(--odoo-teal); }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
     </style>
 </head>
 <body class="main-viewport">
@@ -64,7 +59,7 @@
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-6 h-full">
             <div class="flex items-center gap-2 cursor-pointer" onclick="resetApp()">
-                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5" alt="Logo">
+                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5">
                 <div class="flex flex-col leading-none text-left">
                     <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
                     <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase text-white/80">Consultants</span>
@@ -88,24 +83,24 @@
         </div>
     </header>
 
-    <!-- Subheader: Breadcrumbs & Search -->
+    <!-- Sub-header -->
     <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col text-left">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                 <span class="breadcrumb-item" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
             </div>
             <div class="flex items-center gap-2 mt-1">
-                <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase tracking-tighter text-[10px]">Live Refresh</button>
-                <button id="backBtn" onclick="drillBack()" class="btn-brand bg-slate-100 !text-slate-700 hover:bg-slate-200 py-0.5 px-3 hidden uppercase tracking-tighter text-[10px]">Back</button>
+                <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase text-[10px]">Live Refresh</button>
+                <button id="backBtn" onclick="drillBack()" class="btn-brand bg-slate-100 !text-slate-700 hover:bg-slate-200 py-0.5 px-3 hidden text-[10px]">Back</button>
             </div>
         </div>
-        <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
+        <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-[#714B67] transition-all ml-6">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
             <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
-    <!-- Table Content Area -->
+    <!-- Content Area -->
     <div class="table-scroll-container">
         <table class="odoo-table w-full text-left table-fixed min-w-[1400px]" id="dataTable">
             <thead id="tableHead"></thead>
@@ -113,11 +108,35 @@
         </table>
         <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
             <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
-            <p class="font-bold uppercase tracking-widest text-xs">No records found</p>
+            <p class="font-bold uppercase tracking-widest text-xs">No matching records found</p>
         </div>
     </div>
 
-    <!-- MODAL: Interview Scheduler -->
+    <!-- Communication Modal -->
+    <div id="messageModal" class="modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
+            <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
+                <div class="text-left"><h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
+                <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Personalized Message</p></div>
+                <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full text-slate-400"><i class="ph ph-x text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4 text-left">
+                <div id="emailSubjectContainer"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
+                <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div></div>
+                <div><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Body</label>
+                <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-purple-500 outline-none"></textarea></div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
+                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-purple-600 flex items-center gap-2"><i class="ph ph-copy text-lg"></i> Copy Message</button>
+                <div class="flex gap-2">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all"><i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp</button>
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase flex items-center gap-2 hover:bg-indigo-700 shadow-md transition-all"><i class="ph ph-envelope text-lg"></i> Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interview Modal -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
@@ -126,74 +145,25 @@
             </div>
             <div class="p-6 space-y-4 text-left">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Date</label>
-                        <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Time</label>
-                        <input type="time" id="intTime" value="11:00" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
-                    </div>
+                    <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Date</label>
+                    <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
+                    <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Time</label>
+                    <input type="time" id="intTime" value="11:00" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
                 </div>
-                <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Format</label>
-                    <select id="intFormat" onchange="updateIntLocLabel()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none">
-                        <option value="Google Meet">Google Meet</option>
-                        <option value="Telephonic">Telephonic Interview</option>
-                        <option value="F2F">Face to Face (F2F)</option>
-                    </select>
-                </div>
-                <div>
-                    <label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Link / Address</label>
-                    <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
-                </div>
+                <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Format</label>
+                <select id="intFormat" onchange="updateIntLocLabel()" class="status-dropdown"><option>Google Meet</option><option>Telephonic</option><option>F2F</option></select></div>
+                <div><label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Link / Address</label>
+                <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex justify-end gap-3">
-                <button onclick="closeModal('interviewModal')" class="text-[11px] font-bold text-slate-500 px-4">Cancel</button>
-                <button onclick="submitInterviewInvite()" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest shadow-lg">Generate Invite</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: Message Preview -->
-    <div id="messageModal" class="modal-overlay">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
-            <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
-                <div class="text-left">
-                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase tracking-tighter">Preview</h3>
-                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Hub</p>
-                </div>
-                <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
-            </div>
-            <div class="p-6 space-y-4 text-left">
-                <div id="emailSubjectContainer">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject</label>
-                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
-                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-[#714B67] outline-none shadow-inner"></textarea>
-                </div>
-            </div>
-            <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
-                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-[#714B67] uppercase tracking-widest flex items-center gap-2 transition-all">
-                    <i class="ph ph-copy text-lg"></i> Copy Message
-                </button>
-                <div class="flex gap-2">
-                    <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all">
-                        <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
-                    </button>
-                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md transition-all">
-                        <i class="ph ph-envelope text-lg"></i> Email
-                    </button>
-                </div>
+                <button onclick="closeModal('interviewModal')" class="text-[11px] font-bold text-slate-500">Cancel</button>
+                <button onclick="submitInterviewInvite()" class="bg-indigo-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase shadow-lg">Generate Invite</button>
             </div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
-        
         let currentTab = 'Job Board';
         let drillDown = { type: null, id: null, label: null };
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
@@ -245,10 +215,7 @@
             const sheetName = sheetMap[currentTab] || (drillDown.type === 'job-candidates' ? 'Candidates' : '');
             if (!sheetName) return;
             try {
-                await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'updateStatus', sheet: sheetName, row: row._ROW, col: colName, value: value }) 
-                });
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', sheet: sheetName, row: row._ROW, col: colName, value: value }) });
                 refreshData();
             } catch (e) { alert("Update failed."); }
         }
@@ -256,8 +223,7 @@
         function switchTab(tab) {
             currentTab = tab;
             drillDown = { type: null, id: null, label: null };
-            const nav = document.getElementById('mainNav');
-            Array.from(nav.children).forEach(btn => {
+            document.querySelectorAll('#mainNav button').forEach(btn => {
                 btn.classList.remove('active-tab');
                 if (btn.innerText === tab) btn.classList.add('active-tab');
             });
@@ -266,13 +232,12 @@
 
         function setDrillDown(type, id, label) { drillDown = { type, id, label }; renderUI(); }
         function drillBack() { resetNavigation(); }
-        function resetApp() { drillDown = { type: null, id: null, label: null }; renderUI(); }
         function resetNavigation() { drillDown = { type: null, id: null, label: null }; renderUI(); }
+        function resetApp() { resetNavigation(); switchTab('Job Board'); }
 
         function renderUI() {
             document.getElementById('currentPath').innerText = currentTab;
             document.getElementById('backBtn').classList.add('hidden');
-            
             let dataset = [];
             if (drillDown.type === 'client-jobs') {
                 dataset = (fullData.jobs || []).filter(j => (j.CLIENT_ID || j.CLIENT_NAME) === drillDown.id);
@@ -291,8 +256,7 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            // CLEAN DATA logic: Keep empty skeletons (marked with _IS_EMPTY) or rows with content
-            // Fix: Added billing fields to contents filter to ensure they load
+            // Fixed filter to ensure Billing data always loads
             filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT || r.JOINING_DATE);
             renderTable();
         }
@@ -301,7 +265,6 @@
             const head = document.getElementById('tableHead');
             const body = document.getElementById('tableBody');
             const empty = document.getElementById('noData');
-            
             head.innerHTML = ""; body.innerHTML = "";
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
@@ -313,72 +276,36 @@
             const isBilling = (currentTab === 'Dashboard and Billing');
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
-            
-            if (isCandidatesView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-48'>Status</th><th class='w-24 text-center'>Docs</th>`;
-            } else if (isSourcedView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Status</th><th class='w-32'>Sourced On</th>`;
-            } else if (isJobBoard) {
-                headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
-            } else if (isInterviews) {
-                headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-48'>Next Step</th>`;
-            } else if (isBilling) {
-                headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Status</th>`;
-            } else {
-                const firstRow = filteredData[0];
-                Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
-            }
+            if (isCandidatesView) headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-48'>Status</th><th class='w-24 text-center'>Docs</th>`;
+            else if (isSourcedView) headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Status</th><th class='w-32'>Sourced On</th>`;
+            else if (isJobBoard) headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
+            else if (isInterviews) headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-48'>Next Step</th>`;
+            else if (isBilling) headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Status</th>`;
+            else Object.keys(filteredData[0]).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             
             headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions Bar</th></tr>";
             head.innerHTML = headerHtml;
 
-            // Handle empty skeleton rows
             if (filteredData.length === 1 && filteredData[0]._IS_EMPTY) {
-                body.innerHTML = `<tr><td colspan="10" class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px]">No records found in this sheet</td></tr>`;
+                body.innerHTML = `<tr><td colspan="10" class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px]">No records found</td></tr>`;
                 return;
             }
 
             filteredData.forEach((row, i) => {
-                let rowClick = '';
-                if (currentTab === 'Clients') rowClick = `setDrillDown('client-jobs', '${row.CLIENT_ID || row.Client_ID}', '${row.COMPANY_NAME || row.Company_Name}')`;
-                else if (currentTab === 'Job Board') rowClick = `setDrillDown('job-candidates', '${row.JOB_ID || row.Job_ID}', '${row.POSITION_TITLE || row.Position_Title}')`;
-
-                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${rowClick}">`;
-                bRow += `<td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
-
-                if (isCandidatesView) {
-                    bRow += renderCandidatesRow(row);
-                } else if (isSourcedView) {
-                    bRow += renderSourcedRow(row);
-                } else if (isJobBoard) {
-                    bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.JOB_ID}</td>`;
-                    bRow += `<td><div class='data-stack-title'>${row.POSITION_TITLE || row.TITLE || '--'}</div><div class='data-stack-sub'>${row.LOCATION || '--'}</div></td>`;
-                    bRow += `<td><div class='data-stack-brand'>${row.CLIENT_ID || row.COMPANY || '--'}</div></td>`;
-                    bRow += `<td><div class='font-medium text-slate-600'>Exp: ${row.EXPERIENCE_REQUIRED || row.MIN_EXPERIENCE || '--'}</div><div class='data-stack-sub'>Budget: ${row.CTC_RANGE || row.MIN_SALARY || '--'}</div></td>`;
-                    bRow += `<td>${renderValue('JOB_STATUS', row.JOB_STATUS || row.STATUS)}</td>`;
-                    bRow += `<td class='text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
-                } else if (isInterviews) {
-                    const nextStep = row.NEXT_STEP || 'Pending';
-                    const interviewOpts = ['Pending', '1st Round', '2nd Round', '3rd Round', 'Final Round', 'Selected', 'Rejected'];
-                    bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td>`;
-                    bRow += `<td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td>`;
-                    bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td>`;
-                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${formatSheetTime(row.INTERVIEW_TIME)}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td>`;
-                    bRow += `<td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'NEXT_STEP', this.value)">
-                                ${interviewOpts.map(o => `<option value="${o}" ${nextStep === o ? 'selected' : ''}>${o}</option>`).join('')}
-                             </select></td>`;
-                } else if (isBilling) {
-                    bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || '--'}</div></td>`;
-                    bRow += `<td class='font-bold text-slate-700'>${row.JOINING_DATE || '--'}</td>`;
-                    bRow += `<td><div class='data-stack-emerald'>₹${Number(row.BILLING_AMOUNT || 0).toLocaleString()}</div><div class='data-stack-sub'>Comm: ${row.PERCENTAGE_COMMISSION || '--'}%</div></td>`;
-                    bRow += `<td>${renderValue('PAYMENT_STATUS', row.PAYMENT_STATUS)}</td>`;
-                } else {
-                    Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
-                }
-
-                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)] z-10" onclick="event.stopPropagation()">
-                            <div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div>
-                         </td></tr>`;
+                let rowClick = (currentTab === 'Clients') ? `setDrillDown('client-jobs', '${row.CLIENT_ID || row.Client_ID}', '${row.COMPANY_NAME || row.Company_Name}')` : (currentTab === 'Job Board' ? `setDrillDown('job-candidates', '${row.JOB_ID || row.JOB_ID}', '${row.POSITION_TITLE || row.TITLE}')` : '');
+                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${rowClick}"><td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
+                
+                if (isCandidatesView) bRow += renderCandidatesRow(row);
+                else if (isSourcedView) bRow += renderSourcedRow(row);
+                else if (isJobBoard) bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.JOB_ID}</td><td><div class='data-stack-title'>${row.POSITION_TITLE || row.TITLE || '--'}</div><div class='data-stack-sub'>${row.LOCATION || '--'}</div></td><td><div class='data-stack-brand'>${row.CLIENT_ID || row.COMPANY || '--'}</div></td><td><div class='font-medium text-slate-600'>Exp: ${row.EXPERIENCE_REQUIRED || row.MIN_EXPERIENCE || '--'}</div><div class='data-stack-sub'>Budget: ${row.CTC_RANGE || row.MIN_SALARY || '--'}</div></td><td>${renderValue('JOB_STATUS', row.JOB_STATUS || row.STATUS)}</td><td class='text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
+                else if (isInterviews) {
+                    const status = row.NEXT_STEP || 'Pending';
+                    const opts = ['Pending', '1st Round', '2nd Round', 'Final Round', 'Selected', 'Rejected'];
+                    bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td><td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td><td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td><td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${formatSheetTime(row.INTERVIEW_TIME)}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td><td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'NEXT_STEP', this.value)">${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`;
+                } else if (isBilling) bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || '--'}</div></td><td class='font-bold text-slate-700'>${row.JOINING_DATE || '--'}</td><td><div class='data-stack-emerald'>₹${Number(row.BILLING_AMOUNT || 0).toLocaleString()}</div><div class='data-stack-sub'>Comm: ${row.PERCENTAGE_COMMISSION || '--'}%</div></td><td>${renderValue('PAYMENT_STATUS', row.PAYMENT_STATUS)}</td>`;
+                else Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
+                
+                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)] z-10" onclick="event.stopPropagation()"><div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div></td></tr>`;
                 body.innerHTML += bRow;
             });
         }
@@ -386,29 +313,13 @@
         function renderCandidatesRow(row) {
             const status = row.CURRENT_STATUS || 'Submitted';
             const opts = ['Submitted', 'Shortlisted', 'Interview Scheduled', 'Offered', 'Joined'];
-            let html = `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.JOB_ID || '--'}</td>`;
-            html += `<td><div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_NAME}</div><div class="text-[10px] text-slate-400">${row.EMAIL}</div><div class="text-[10px] text-[#714B67] font-bold">${row.PHONE}</div></td>`;
-            html += `<td><div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div><div class="text-[9px] text-slate-400 uppercase font-bold">${row.JOB_ID || '--'}</div></td>`;
-            html += `<td><div class="text-slate-600 font-medium">Total: ${row.TOTAL_EXPERIENCE || '--'}</div><div class="text-[10px] text-slate-400 italic">Rel: ${row.RELEVANT_EXPERIENCE || '--'}</div></td>`;
-            html += `<td><div class="text-emerald-700 font-bold">Exp: ${row.EXPECTED_CTC || '--'}</div><div class="text-[9px] text-slate-400">Curr: ${row.CURRENT_CTC || '--'}</div></td>`;
-            html += `<td><select class="status-dropdown w-full" onchange="updateStatus(${JSON.stringify(row)}, 'CURRENT_STATUS', this.value)">
-                        ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
-                     </select></td>`;
-            html += `<td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">CV</a>` : '--'}</td>`;
-            return html;
+            return `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.JOB_ID || '--'}</td><td><div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_NAME}</div><div class="text-[10px] text-slate-400">${row.EMAIL}</div><div class="text-[10px] text-[#714B67] font-bold">${row.PHONE}</div></td><td><div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div><div class="text-[9px] text-slate-400 uppercase font-bold">${row.JOB_ID || '--'}</div></td><td><div class="text-slate-600 font-medium">Total: ${row.TOTAL_EXPERIENCE || '--'}</div><div class="text-[10px] text-slate-400 italic">Rel: ${row.RELEVANT_EXPERIENCE || '--'}</div></td><td><div class="text-emerald-700 font-bold">Exp: ${row.EXPECTED_CTC || '--'}</div><div class="text-[9px] text-slate-400">Curr: ${row.CURRENT_CTC || '--'}</div></td><td><select class="status-dropdown w-full" onchange="updateStatus(${JSON.stringify(row)}, 'CURRENT_STATUS', this.value)">${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}</select></td><td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] border border-teal-100 uppercase">CV</a>` : '--'}</td>`;
         }
 
         function renderSourcedRow(row) {
             const status = row.STATUS || 'New';
             const opts = ['New', 'Contacted', 'Applied', 'Not interested', 'No reply'];
-            let html = `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.JOB_ID || '--'}</td>`;
-            html += `<td><div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_SOURCED || row.CANDIDATE_NAME}</div><div class="text-[10px] text-slate-400">${row.SOURCED_EMAIL || row.EMAIL}</div><div class="text-[10px] text-[#714B67] font-bold">${row.SOURCED_PHONE || row.PHONE}</div></td>`;
-            html += `<td><div class="font-semibold text-slate-700 leading-tight">${row.POSITION_TITLE || row.JOB_TITLE || '--'}</div></td>`;
-            html += `<td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'STATUS', this.value)">
-                        ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
-                     </select></td>`;
-            html += `<td class="text-slate-400 font-bold text-[10px]">${row.OUTREACH_DATE || row.APPLIED_DATE || '--'}</td>`;
-            return html;
+            return `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.JOB_ID || '--'}</td><td><div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_SOURCED || row.CANDIDATE_NAME}</div><div class="text-[10px] text-slate-400">${row.SOURCED_EMAIL || row.EMAIL}</div><div class="text-[10px] text-[#714B67] font-bold">${row.SOURCED_PHONE || row.PHONE}</div></td><td><div class="font-semibold text-slate-700 leading-tight">${row.POSITION_TITLE || row.JOB_TITLE || '--'}</div></td><td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'STATUS', this.value)">${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}</select></td><td class="text-slate-400 font-bold text-[10px]">${row.OUTREACH_DATE || row.APPLIED_DATE || '--'}</td>`;
         }
 
         function renderValue(k, v) {
@@ -416,9 +327,7 @@
             const key = k.toLowerCase();
             if (key.includes('status')) {
                 const s = String(v).toLowerCase();
-                let cls = "bg-slate-100 text-slate-500 border-slate-200";
-                if (['open', 'active', 'hired', 'confirmed', 'paid', 'submitted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
-                if (['rejected', 'cold', 'dropped', 'off', 'overdue', 'cancelled'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
+                let cls = (['open', 'active', 'hired', 'confirmed', 'paid', 'submitted'].includes(s)) ? "bg-teal-50 text-teal-700 border-teal-100" : (['rejected', 'cold', 'dropped', 'off', 'overdue', 'cancelled'].includes(s) ? "bg-rose-50 text-rose-700 border-rose-100" : "bg-slate-100 text-slate-500 border-slate-200");
                 return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
             }
             if (key.includes('ctc') || key.includes('amount')) return `<span class="font-bold text-slate-800 tracking-tight">₹${Number(v).toLocaleString()}</span>`;
@@ -427,19 +336,10 @@
 
         function renderActions(row, i) {
             let html = ``;
-            if (currentTab === 'Job Board') {
-                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-                html += `<button onclick="compose('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-500" title="Email JD"><i class="ph ph-envelope-simple text-base"></i></button>`;
-            } else if (currentTab === 'Clients') {
-                html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WA Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-            } else if (currentTab === 'Dashboard and Billing') {
-                html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="WA Reminder"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-                html += `<button onclick="compose('BILLING_REMINDER_EMAIL', ${i})" class="action-btn text-indigo-500" title="Email Reminder"><i class="ph ph-envelope-simple text-base"></i></button>`;
-            } else {
-                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-                html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
-                html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
-            }
+            if (currentTab === 'Job Board') html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button><button onclick="compose('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-500" title="Email JD"><i class="ph ph-envelope-simple text-base"></i></button>`;
+            else if (currentTab === 'Clients') html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WA Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+            else if (currentTab === 'Dashboard and Billing') html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="WA Reminder"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+            else html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button><button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button><button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             return html;
         }
 
@@ -447,46 +347,40 @@
             showLoader(true);
             const row = filteredData[idx];
             try {
-                // EXPLICIT VARIABLE MAPPING FOR COMMUNICATION
+                // NORMALIZATION FOR COMMUNICATION
                 const rowData = { 
                     ...row, 
+                    CANDIDATE_NAME: row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || 'Candidate',
                     POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || row.POSITION || 'the Position',
                     COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || 'Raveone Consultants',
                     LOCATION: row.LOCATION || row.JOB_LOCATION || row.CURRENT_LOCATION || 'Bangalore',
-                    EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || row.EXPERIENCE_REQUIRED || '2-3 years',
-                    CTC_RANGE: row.CTC_RANGE || row.EXPECTED_CTC || 'As per industry standards',
+                    EXPERIENCE_REQUIRED: row.EXPERIENCE_REQUIRED || row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || row.MIN_EXPERIENCE || '2-3 years',
+                    CTC_RANGE: row.CTC_RANGE || row.EXPECTED_CTC || row.MIN_SALARY || 'As per industry standards',
                     JOB_ID: row.JOB_ID || 'N/A',
-                    // Fallback for JD Link
-                    JD_LINK: row.JD_LINK || `https://rajeshkrao1976.github.io/careers/?jobId=${row.JOB_ID || ''}`,
-                    APP_LINK: `https://forms.gle/TEn6Ws23TtsdKeyN7`
+                    JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${row.JOB_ID || ''}`,
+                    APP_LINK: `Refer to JD link for application form.`
                 };
 
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
-                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
+                document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME;
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
-                document.getElementById('emailSubject').innerText = res.subject || "Portal Update";
+                document.getElementById('emailSubject').innerText = res.subject || "CRM Portal Update";
                 document.getElementById('messageBody').value = res.message;
                 
                 const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
-                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject || "Update")}&body=${encodeURIComponent(res.message)}`, '_blank');
                 
                 openModal('messageModal');
-            } catch (err) { alert("Message rendering error."); }
+            } catch (err) { alert("Data fetch failed."); }
             showLoader(false);
         }
 
-        function openIntModal(idx) {
-            activeRowIdx = idx;
-            document.getElementById('intDate').valueAsDate = new Date();
-            updateIntLocLabel();
-            openModal('interviewModal');
-        }
-
+        function openIntModal(idx) { activeRowIdx = idx; document.getElementById('intDate').valueAsDate = new Date(); updateIntLocLabel(); openModal('interviewModal'); }
         function updateIntLocLabel() {
             const fmt = document.getElementById('intFormat').value;
             const lbl = document.getElementById('intLocLabel');
@@ -498,14 +392,11 @@
 
         async function submitInterviewInvite() {
             showLoader(true);
-            const overrides = {
-                INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
-                INTERVIEW_TIME: document.getElementById('intTime').value,
-                INTERVIEW_MODE: document.getElementById('intFormat').value,
-                INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
-            };
+            const overrides = { INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), INTERVIEW_TIME: document.getElementById('intTime').value, INTERVIEW_MODE: document.getElementById('intFormat').value, INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides: overrides }) });
+                const row = filteredData[activeRowIdx];
+                const rowData = { ...row, CANDIDATE_NAME: row.CANDIDATE_NAME || 'Candidate', POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || 'the Position' };
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: rowData, overrides: overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
@@ -514,12 +405,7 @@
             showLoader(false);
         }
 
-        function handleFilter() {
-            const q = document.getElementById('globalSearch').value.toLowerCase();
-            renderUI();
-            if (q) filteredData = filteredData.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
-            renderTable();
-        }
+        function handleFilter() { const q = document.getElementById('globalSearch').value.toLowerCase(); renderUI(); if (q) filteredData = filteredData.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q))); renderTable(); }
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -529,7 +415,7 @@
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data flow verified.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! CRM state synced.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
