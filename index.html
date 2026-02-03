@@ -23,6 +23,7 @@
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
+        /* Layout */
         .main-viewport { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
         .table-scroll-container { flex: 1; overflow: auto; background-color: white; border-top: 1px solid var(--odoo-border); }
         
@@ -56,10 +57,10 @@
 
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Hiregrow Logic</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Hiregrow State</p>
     </div>
 
-    <!-- Navigation Header -->
+    <!-- Top Navbar -->
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-6 h-full">
             <div class="flex items-center gap-2 cursor-pointer" onclick="resetApp()">
@@ -83,11 +84,11 @@
                 <i class="ph ph-arrows-clockwise"></i> Sync Website
             </button>
             <div class="h-6 w-[1px] bg-white/20"></div>
-            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-all uppercase">Test Sync</button>
+            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-all uppercase">Test API</button>
         </div>
     </header>
 
-    <!-- Breadcrumbs -->
+    <!-- Subheader: Breadcrumbs & Search -->
     <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col text-left">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
@@ -100,11 +101,11 @@
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Filter active records..." class="w-full bg-transparent py-1.5 text-xs outline-none">
+            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
-    <!-- Table Container -->
+    <!-- Table Content Area -->
     <div class="table-scroll-container">
         <table class="odoo-table w-full text-left table-fixed min-w-[1400px]" id="dataTable">
             <thead id="tableHead"></thead>
@@ -116,7 +117,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- MODAL: Interview Scheduler -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
@@ -154,23 +155,24 @@
         </div>
     </div>
 
+    <!-- MODAL: Message Preview -->
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
                 <div class="text-left">
                     <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase tracking-tighter">Preview</h3>
-                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Engine</p>
+                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Hub</p>
                 </div>
                 <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4 text-left">
                 <div id="emailSubjectContainer">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject</label>
                     <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Body</label>
-                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none shadow-inner"></textarea>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-[#714B67] outline-none shadow-inner"></textarea>
                 </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
@@ -290,7 +292,8 @@
             }
             
             // CLEAN DATA logic: Keep empty skeletons (marked with _IS_EMPTY) or rows with content
-            filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT);
+            // Fix: Added billing fields to contents filter to ensure they load
+            filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT || r.JOINING_DATE);
             renderTable();
         }
 
@@ -329,9 +332,9 @@
             headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions Bar</th></tr>";
             head.innerHTML = headerHtml;
 
-            // Handle the "No records" body state if only skeleton exists
+            // Handle empty skeleton rows
             if (filteredData.length === 1 && filteredData[0]._IS_EMPTY) {
-                body.innerHTML = `<tr><td colspan="10" class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px]">No records in this sheet</td></tr>`;
+                body.innerHTML = `<tr><td colspan="10" class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px]">No records found in this sheet</td></tr>`;
                 return;
             }
 
@@ -444,25 +447,34 @@
             showLoader(true);
             const row = filteredData[idx];
             try {
+                // EXPLICIT VARIABLE MAPPING FOR COMMUNICATION
                 const rowData = { 
                     ...row, 
-                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || '--',
-                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || '--',
-                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '--',
-                    EXPECTED_CTC: row.EXPECTED_CTC || '--',
-                    CURRENT_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || '--'
+                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || row.POSITION || 'the Position',
+                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || 'Raveone Consultants',
+                    LOCATION: row.LOCATION || row.JOB_LOCATION || row.CURRENT_LOCATION || 'Bangalore',
+                    EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || row.EXPERIENCE_REQUIRED || '2-3 years',
+                    CTC_RANGE: row.CTC_RANGE || row.EXPECTED_CTC || 'As per industry standards',
+                    JOB_ID: row.JOB_ID || 'N/A',
+                    // Fallback for JD Link
+                    JD_LINK: row.JD_LINK || `https://rajeshkrao1976.github.io/careers/?jobId=${row.JOB_ID || ''}`,
+                    APP_LINK: `https://forms.gle/TEn6Ws23TtsdKeyN7`
                 };
+
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
+                
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject || "Portal Update";
                 document.getElementById('messageBody').value = res.message;
+                
                 const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
                 document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+                
                 openModal('messageModal');
             } catch (err) { alert("Message rendering error."); }
             showLoader(false);
@@ -493,7 +505,7 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides: overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
@@ -511,13 +523,13 @@
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied!"); }
+        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied to clipboard!"); }
         async function testConnection() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data synced.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data flow verified.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
