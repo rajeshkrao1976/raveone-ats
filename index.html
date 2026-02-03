@@ -3,46 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiregrow CRM | Odoo Compact Edition</title>
+    <title>Hiregrow CRM | Compact Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #334155; overflow: hidden; }
-        :root { --odoo-purple: #714B67; --odoo-teal: #00A09D; --odoo-border: #e2e8f0; }
-        
+        body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; color: #495057; overflow: hidden; }
+        :root { --odoo-purple: #714B67; --odoo-teal: #00A09D; --odoo-border: #dee2e6; }
         .odoo-header { background-color: var(--odoo-purple); color: white; }
-        .btn-primary { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 600; font-size: 12px; border: none; cursor: pointer; }
+        .btn-primary { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 500; font-size: 12px; border: none; cursor: pointer; }
         
-        .odoo-table thead { background-color: #f1f5f9; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
-        .odoo-table th { padding: 6px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); white-space: nowrap; color: #64748b; }
-        .odoo-table td { padding: 6px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; border-right: 1px solid #f8fafc; }
+        /* Compact Table Styles */
+        .odoo-table thead { background-color: #f1f3f5; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
+        .odoo-table th { padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid var(--odoo-border); white-space: nowrap; color: #666; }
+        .odoo-table td { padding: 8px 10px; font-size: 11px; border-bottom: 1px solid #f1f3f5; white-space: nowrap; border-right: 1px solid #f8f9fa; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
-        
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
         #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
-        .spinner { border: 2px solid #f3f3f3; border-top: 2px solid var(--odoo-teal); border-radius: 50%; width: 30px; height: 30px; animation: spin 0.8s linear infinite; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-teal); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.open { display: flex; }
-        .action-btn { padding: 0.3rem; border-radius: 0.25rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .action-btn { padding: 0.35rem; border-radius: 0.375rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .action-btn:hover { background-color: #f1f5f9; transform: scale(1.1); }
-        
-        .compact-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
-        .compact-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .breadcrumb-item:hover { color: var(--odoo-teal); cursor: pointer; text-decoration: underline; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden">
+<body class="flex flex-col h-screen overflow-hidden text-xs">
 
     <header class="odoo-header h-10 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-4 h-full">
             <div class="flex items-center gap-2">
-                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-6 w-6 rounded bg-white p-0.5" alt="Hiregrow">
+                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-6 w-6 rounded bg-white p-0.5" alt="Logo">
                 <span class="font-bold text-xs uppercase tracking-tight">Hiregrow CRM</span>
             </div>
-            <nav class="flex gap-4 h-full text-[10px] font-bold uppercase tracking-wider">
+            <nav class="flex gap-3 h-full text-[10px] font-bold uppercase tracking-wider">
                 <button onclick="switchView('Job Board')" id="tab-jobs" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Job Board</button>
                 <button onclick="switchView('Sourced')" id="tab-sourced" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Sourced</button>
                 <button onclick="switchView('Candidates')" id="tab-candidates" class="h-full px-1 opacity-70 hover:opacity-100 transition-all">Candidates</button>
@@ -53,48 +51,84 @@
         </div>
         <div class="ml-auto flex items-center gap-3">
             <button onclick="syncWebsiteForm()" class="text-[9px] font-bold bg-emerald-600 text-white px-2 py-1 rounded uppercase flex items-center gap-1 hover:bg-emerald-700">
-                <i class="ph ph-arrows-clockwise"></i> Sync
+                <i class="ph ph-arrows-clockwise"></i> Sync Website
             </button>
             <button onclick="testConnection()" class="text-[9px] font-bold bg-white/10 px-2 py-1 rounded hover:bg-white/20">Test</button>
         </div>
     </header>
 
-    <div class="bg-white py-1.5 px-4 flex items-center justify-between border-b shrink-0">
+    <div class="bg-white py-1 px-4 flex items-center justify-between border-b shrink-0 h-10">
         <div class="flex flex-col">
-            <div id="breadcrumb" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <span class="hover:text-teal-600 cursor-pointer" onclick="resetDrillDown()">CRM</span> / <span id="currentTabName" class="text-slate-600">Job Board</span>
+            <div id="breadcrumb" class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <span class="breadcrumb-item" onclick="resetDrillDown()">CRM</span> / <span id="currentTabName">Job Board</span>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
-                <button onclick="refreshData()" class="btn-primary text-[10px]">Refresh Sync</button>
-                <button id="backBtn" onclick="resetDrillDown()" class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200 text-[10px] hidden">Back</button>
+                <button onclick="refreshData()" class="btn-primary text-[10px] py-0.5 px-2">Refresh</button>
+                <button id="backBtn" onclick="resetDrillDown()" class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200 text-[10px] py-0.5 px-2 hidden">Back</button>
             </div>
         </div>
-        <div class="flex-1 max-w-xs bg-slate-100 border rounded px-2 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-4">
-            <i class="ph ph-magnifying-glass text-slate-400 mr-1 text-sm"></i>
-            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Filter..." class="w-full bg-transparent py-1 text-xs outline-none">
+        <div class="flex-1 max-w-xs bg-slate-100 border rounded px-2 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all">
+            <i class="ph ph-magnifying-glass text-slate-400 mr-1"></i>
+            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Filter..." class="w-full bg-transparent py-0.5 text-xs outline-none">
         </div>
     </div>
 
-    <div class="flex-1 overflow-auto bg-white compact-scroll">
-        <table class="odoo-table w-full text-left table-fixed">
+    <div class="flex-1 overflow-auto bg-white scrollbar-hide">
+        <table class="odoo-table w-full text-left table-fixed min-w-[3000px]">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div id="noData" class="flex flex-col items-center justify-center py-20 text-slate-300 hidden">
-            <i class="ph ph-folder-open text-4xl opacity-20 mb-2"></i>
-            <p class="font-bold uppercase tracking-widest text-[10px]">No records found</p>
+        <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
+            <i class="ph ph-folder-open text-6xl opacity-20 mb-4"></i>
+            <p class="font-bold uppercase tracking-widest text-xs">No records found</p>
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Message Preview Modal -->
+    <div id="messageModal" class="modal-overlay">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all">
+            <div class="p-3 border-b bg-slate-50 flex items-center justify-between">
+                <div>
+                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
+                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic">Communication Engine</p>
+                </div>
+                <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
+            </div>
+            <div class="p-4 space-y-3 text-left">
+                <div id="emailSubjectContainer">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject</label>
+                    <div id="emailSubject" class="p-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message</label>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none"></textarea>
+                </div>
+            </div>
+            <div class="p-3 bg-slate-50 border-t flex items-center justify-between">
+                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-teal-600 uppercase tracking-widest flex items-center gap-1 transition-colors">
+                    <i class="ph ph-copy text-sm"></i> Copy
+                </button>
+                <div class="flex gap-2">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md">
+                        <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
+                    </button>
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 shadow-md">
+                        <i class="ph ph-envelope text-lg"></i> Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interview Modal -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform transition-all">
             <div class="p-3 border-b bg-indigo-50 flex items-center justify-between">
                 <h3 class="font-bold text-indigo-800 text-xs uppercase">Schedule Interview</h3>
                 <button onclick="closeModal('interviewModal')" class="p-1 hover:bg-white rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="p-4 space-y-3">
-                <div class="grid grid-cols-2 gap-3 text-left">
+            <div class="p-4 space-y-3 text-left">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Date</label>
                         <input type="date" id="intDate" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
@@ -104,7 +138,7 @@
                         <input type="time" id="intTime" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
                     </div>
                 </div>
-                <div class="text-left">
+                <div>
                     <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Format</label>
                     <select id="intFormat" onchange="updateIntLocLabel()" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none">
                         <option value="Google Meet">Google Meet</option>
@@ -112,49 +146,14 @@
                         <option value="F2F">Face to Face (F2F)</option>
                     </select>
                 </div>
-                <div class="text-left">
-                    <label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Meeting Link / Loc</label>
+                <div>
+                    <label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Meeting Link / Address</label>
                     <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none">
                 </div>
             </div>
             <div class="p-3 bg-slate-50 border-t flex justify-end gap-2">
-                <button onclick="closeModal('interviewModal')" class="text-[10px] font-bold text-slate-500 px-3">Cancel</button>
+                <button onclick="closeModal('interviewModal')" class="text-[10px] font-bold text-slate-500">Cancel</button>
                 <button onclick="generateIntInvite()" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest shadow-md">Create Invitation</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="messageModal" class="modal-overlay">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all">
-            <div class="p-3 border-b bg-slate-50 flex items-center justify-between">
-                <div>
-                    <h3 id="modalTitle" class="font-bold text-slate-800 text-xs uppercase">Preview</h3>
-                    <p id="modalSubtitle" class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Enriched Template</p>
-                </div>
-                <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full text-slate-400 transition-all"><i class="ph ph-x text-lg"></i></button>
-            </div>
-            <div class="p-4 space-y-3 text-left">
-                <div id="emailSubjectContainer">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Subject</label>
-                    <div id="emailSubject" class="p-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Message Body</label>
-                    <textarea id="messageBody" class="w-full h-72 p-3 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none"></textarea>
-                </div>
-            </div>
-            <div class="p-3 bg-slate-50 border-t flex items-center justify-between">
-                <button onclick="copyMessage()" class="text-[9px] font-bold text-slate-500 hover:text-teal-600 uppercase tracking-widest flex items-center gap-1 transition-colors">
-                    <i class="ph ph-copy text-sm"></i> Copy
-                </button>
-                <div class="flex gap-2">
-                    <button id="waActionBtn" class="bg-emerald-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 hover:bg-emerald-700 shadow-sm">
-                        <i class="ph ph-whatsapp-logo text-lg"></i> WhatsApp
-                    </button>
-                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 hover:bg-indigo-700 shadow-sm">
-                        <i class="ph ph-envelope text-lg"></i> Email
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -162,7 +161,7 @@
     <!-- AI Drawer -->
     <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l flex flex-col">
         <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
-            <h3 class="font-bold text-teal-700 text-[10px] flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Fitment Intelligence</h3>
+            <h3 class="font-bold text-teal-700 text-xs flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Fitment Intelligence</h3>
             <button onclick="closeAi()"><i class="ph ph-x text-lg text-slate-400"></i></button>
         </div>
         <div id="aiContent" class="p-4 flex-1 overflow-auto text-xs text-left leading-relaxed text-slate-600 italic">Select record...</div>
@@ -170,11 +169,12 @@
 
     <div id="loader">
         <div class="spinner mb-2"></div>
-        <p class="text-[8px] font-bold text-teal-600 uppercase tracking-[0.2em] animate-pulse">Syncing Database...</p>
+        <p class="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] animate-pulse">Syncing Intelligence</p>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzkiHVsgG6nIIgitESrBdF0WGCbifyxWwNYJXAzcf5_-tRSI_MFO-AeQFXi4eo1iFMi/exec"; 
+        // REPLACE THIS with your Apps Script Web App URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
         
         let currentView = 'Job Board';
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
@@ -233,14 +233,14 @@
             if (currentView === 'Candidates') {
                 cols = ['JOB_ID', 'APP_ID', 'CLIENT_ID', 'JOB_TITLE', 'JOB_LOCATION', 'CURRENT_STATUS', 'CANDIDATE_NAME', 'PHONE', 'EMAIL', 'EDUCATION', 'TOTAL_EXPERIENCE', 'RELEVANT_EXPERIENCE', 'CURRENT_CTC', 'EXPECTED_CTC', 'NOTICE_PERIOD', 'INTERVIEW_TELEPHONIC', 'INTERVIEW_F2F', 'CURRENT_LOCATION', 'RESUME_LINK', 'SUBMITTED_DATE'];
             } else if (currentView === 'Clients') {
-                cols = ['CLIENT_ID','CONTACT_NAME','EMAIL','PHONE','COMPANY_NAME','WEBSITE','ASSIGNED_JOBS_COUNT','ADDRESS','CLIENT_STATUS'];
+                cols = ['CLIENT_ID', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'COMPANY_NAME', 'WEBSITE', 'ASSIGNED_JOBS_COUNT', 'ADDRESS', 'CLIENT_STATUS'];
             } else if (currentView === 'Dashboard and Billing') {
-                cols = ['CLIENT_NAME','CANDIDATE_NAME','JOINING_DATE','PERCENTAGE_COMMISSION','CTC_CANDIDATE','BILLING_AMOUNT','PAYMENT_STATUS','BALANCE_DUE'];
+                cols = ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'PERCENTAGE_COMMISSION', 'CTC_CANDIDATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE'];
             } else {
                 cols = Object.keys(filteredData[0]).filter(k => !k.startsWith('_'));
             }
             
-            let hRow = "<tr><th class='w-8 px-2'><input type='checkbox'></th>";
+            let hRow = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             cols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
             hRow += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-24'>Actions</th></tr>";
             head.innerHTML = hRow;
@@ -269,7 +269,7 @@
 
         function drillDownCandidates(jobId) {
             filteredData = fullData.candidates.filter(c => c.JOB_ID === jobId);
-            document.getElementById('currentTabName').innerText = `Jobs / ${jobId} / Candidates`;
+            document.getElementById('currentTabName').innerText = `Job / ${jobId} / Candidates`;
             document.getElementById('backBtn').classList.remove('hidden');
             renderTable();
         }
@@ -280,7 +280,7 @@
             let html = `<button onclick="runAi(${i}, event)" class="action-btn text-teal-600" title="Gemini Analysis"><i class="ph ph-sparkle-fill text-base"></i></button>`;
             if (currentView === 'Candidates' || currentView === 'Sourced' || currentView === 'Job Board') {
                 html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-                html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit to Client"><i class="ph ph-user-circle-plus text-base"></i></button>`;
+                html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
                 html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Schedule Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             }
             return html;
@@ -324,7 +324,7 @@
                 });
                 const res = await resp.json();
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
-                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.Candidate_Name || "Record Preview";
+                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.Candidate_Name || "Record";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject;
                 document.getElementById('messageBody').value = res.message;
@@ -362,12 +362,12 @@
             const row = filteredData[idx];
             let job = currentView === 'Job Board' ? row : (fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0] || {});
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class="py-10 text-center"><div class="spinner mx-auto mb-2"></div><p class="text-[8px] font-bold text-slate-400">Gemini Ranking...</p></div>`;
+            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] uppercase font-bold text-slate-400">Gemini Ranking...</p></div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `<div class="mb-2 text-[9px] font-black text-teal-600 uppercase tracking-widest text-left">Analysis: ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-3 rounded border shadow-sm leading-relaxed text-left text-[10px]">${res.analysis}</div>`;
-            } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-2 bg-rose-50 text-rose-700 rounded text-[10px]">Error.</div>`; }
+                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest text-left">Fitment Analysis: ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed text-left">${res.analysis}</div>`;
+            } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">Error.</div>`; }
         }
 
         function handleSearch() {
