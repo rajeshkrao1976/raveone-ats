@@ -15,38 +15,42 @@
         .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
-        /* High-Density Compact Table */
-        .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .odoo-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; }
-        .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
+        /* High-Density Table Layout */
+        .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
+        .odoo-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; background: #f9fafb; }
+        .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: nowrap; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
+        
+        /* Layout Containers */
+        .main-viewport { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+        .table-scroll-container { flex: 1; overflow: auto; background-color: white; border-top: 1px solid var(--odoo-border); }
         
         #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-purple); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.open { display: flex; }
         
         .action-btn { padding: 0.35rem; border-radius: 0.375rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
         .action-btn:hover { background-color: #f1f5f9; transform: scale(1.15); }
         
         .breadcrumb-item:hover { color: var(--odoo-teal); cursor: pointer; text-decoration: underline; }
-        /* Scroll fixes */
-        .table-container { flex: 1; overflow: auto; background-color: white; }
-        .scrollbar-hide::-webkit-scrollbar { width: 6px; height: 6px; }
-        .scrollbar-hide::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .scrollbar-hide::-webkit-scrollbar-track { background: #f1f5f9; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden">
+<body class="main-viewport">
 
     <!-- Global Loader -->
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Google Sheets Data</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Database State</p>
     </div>
 
     <!-- Navigation Header -->
@@ -54,7 +58,7 @@
         <div class="flex items-center gap-6 h-full">
             <div class="flex items-center gap-2 cursor-pointer" onclick="resetNavigation()">
                 <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5" alt="Logo">
-                <div class="flex flex-col leading-none">
+                <div class="flex flex-col leading-none text-left">
                     <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
                     <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase text-white/80">Consultants</span>
                 </div>
@@ -79,7 +83,7 @@
 
     <!-- Subheader: Breadcrumbs & Filters -->
     <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
-        <div class="flex flex-col">
+        <div class="flex flex-col text-left">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                 <span class="breadcrumb-item" onclick="resetNavigation()">CRM</span> / <span id="currentPath">Job Board</span>
             </div>
@@ -90,13 +94,13 @@
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
+            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active records..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
-    <!-- Data Table Container -->
-    <div class="table-container scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed min-w-[3000px]" id="dataTable">
+    <!-- Main Data Area -->
+    <div class="table-scroll-container scrollbar-hide">
+        <table class="odoo-table w-full text-left table-fixed min-w-[3200px]" id="dataTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
@@ -154,7 +158,7 @@
                 </div>
                 <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full transition-all text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 text-left">
                 <div id="emailSubjectContainer" class="text-left">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block text-left">Subject Line</label>
                     <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700 text-left"></div>
@@ -200,9 +204,28 @@
         let activeRowIdx = null;
 
         window.onload = function() {
+            // Read URL Parameters for Pagination/State
+            const params = new URLSearchParams(window.location.search);
+            const savedTab = params.get('tab');
+            const savedDrillType = params.get('drillType');
+            const savedDrillId = params.get('drillId');
+
+            if (savedTab) currentTab = savedTab;
+            if (savedDrillType && savedDrillId) drillDown = { type: savedDrillType, id: savedDrillId, label: 'Record' };
+
             if (!API_URL.includes("PASTE_YOUR")) refreshData();
-            switchTab('Job Board');
+            switchTab(currentTab);
         };
+
+        function updateURL() {
+            const params = new URLSearchParams();
+            params.set('tab', currentTab);
+            if (drillDown.type) {
+                params.set('drillType', drillDown.type);
+                params.set('drillId', drillDown.id);
+            }
+            window.history.pushState({}, '', '?' + params.toString());
+        }
 
         async function refreshData() {
             showLoader(true);
@@ -233,16 +256,19 @@
                 btn.classList.remove('active-tab');
                 if (btn.innerText === tab) btn.classList.add('active-tab');
             });
+            updateURL();
             renderUI();
         }
 
         function setDrillDown(type, id, label) {
             drillDown = { type, id, label };
+            updateURL();
             renderUI();
         }
 
         function resetNavigation() {
             drillDown = { type: null, id: null, label: null };
+            updateURL();
             renderUI();
         }
 
@@ -253,7 +279,7 @@
             document.getElementById('backBtn').classList.add('hidden');
             
             let dataset = [];
-            // Mapping Logic
+            // Tab Mapping
             if (drillDown.type === 'client-jobs') {
                 dataset = fullData.jobs.filter(j => (j.CLIENT_ID || j.CLIENT_NAME) === drillDown.id);
                 document.getElementById('currentPath').innerText = `Clients / ${drillDown.id} / Jobs`;
@@ -263,11 +289,11 @@
                 document.getElementById('currentPath').innerText = `Jobs / ${drillDown.id} / Candidates`;
                 document.getElementById('backBtn').classList.remove('hidden');
             } else {
-                if (currentTab === 'Dashboard and Billing') dataset = fullData.billing;
-                else if (currentTab === 'Interview Tracker') dataset = fullData.interviews;
+                if (currentTab === 'Dashboard and Billing') dataset = fullData.billing || [];
+                else if (currentTab === 'Interview Tracker') dataset = fullData.interviews || [];
                 else {
                     const key = currentTab.toLowerCase().replace(/ /g, '_');
-                    dataset = fullData[key] || fullData.jobs;
+                    dataset = fullData[key] || fullData.jobs || [];
                 }
             }
 
@@ -287,27 +313,18 @@
             const firstRow = filteredData[0];
             const allKeys = Object.keys(firstRow).filter(k => !k.startsWith('_'));
 
-            // Compact Reference Layout Logic
             const isGroupedView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates' || currentTab === 'Sourced');
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             
             if (isGroupedView) {
-                headerHtml += `
-                    <th class='w-28'>Job ID</th>
-                    <th class='w-64'>Candidate</th>
-                    <th class='w-56'>Applied For</th>
-                    <th class='w-40'>Experience</th>
-                    <th class='w-40'>CTC Details</th>
-                    <th class='w-64'>Notice & Location</th>
-                    <th class='w-24 text-center'>Docs</th>
-                    <th class='w-32'>Applied On</th>`;
+                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-64'>Notice & Location</th><th class='w-24 text-center'>Docs</th><th class='w-32'>Applied On</th>`;
             } else {
-                // Show only fields present in the sheet
                 allKeys.forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
-            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-28 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]'>Actions Bar</th></tr>";
+            // Fixed sticky Action bar
+            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions Bar</th></tr>";
             head.innerHTML = headerHtml;
 
             filteredData.forEach((row, i) => {
@@ -334,36 +351,18 @@
                     const date = row.SUBMITTED_DATE || row.APPLIED_DATE || row.OUTREACH_DATE || '--';
 
                     bRow += `<td class="font-mono text-[10px] text-slate-400 uppercase">${jobId}</td>`;
-                    bRow += `<td>
-                                <div class="font-bold text-slate-900 leading-tight">${name}</div>
-                                <div class="text-[10px] text-slate-400">${email}</div>
-                                <div class="text-[10px] text-[#714B67] font-bold">${phone}</div>
-                             </td>`;
-                    bRow += `<td>
-                                <div class="font-semibold text-slate-700 leading-tight">${jobTitle}</div>
-                                <div class="text-[9px] text-slate-400 uppercase font-bold">${jobId}</div>
-                             </td>`;
-                    bRow += `<td>
-                                <div class="text-slate-600 font-medium">Total: ${totalExp}</div>
-                                <div class="text-[10px] text-slate-400 italic">Rel: ${relExp}</div>
-                             </td>`;
-                    bRow += `<td>
-                                <div class="text-emerald-700 font-bold">Exp: ${expCtc}</div>
-                                <div class="text-[9px] text-slate-400">Curr: ${curCtc}</div>
-                             </td>`;
-                    bRow += `<td>
-                                <div class="text-slate-600 font-medium">${notice}</div>
-                                <div class="text-[10px] text-slate-400">${location}</div>
-                             </td>`;
-                    bRow += `<td class='text-center'>
-                                ${resume ? `<a href="${resume}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100 shadow-sm">View CV</a>` : '--'}
-                             </td>`;
+                    bRow += `<td><div class="font-bold text-slate-900 leading-tight">${name}</div><div class="text-[10px] text-slate-400">${email}</div><div class="text-[10px] text-[#714B67] font-bold">${phone}</div></td>`;
+                    bRow += `<td><div class="font-semibold text-slate-700 leading-tight">${jobTitle}</div><div class="text-[9px] text-slate-400 uppercase font-bold">${jobId}</div></td>`;
+                    bRow += `<td><div class="text-slate-600 font-medium">Total: ${totalExp}</div><div class="text-[10px] text-slate-400 italic">Rel: ${relExp}</div></td>`;
+                    bRow += `<td><div class="text-emerald-700 font-bold">Exp: ${expCtc}</div><div class="text-[9px] text-slate-400">Curr: ${curCtc}</div></td>`;
+                    bRow += `<td><div class="text-slate-600 font-medium">${notice}</div><div class="text-[10px] text-slate-400">${location}</div></td>`;
+                    bRow += `<td class='text-center'>${resume ? `<a href="${resume}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100 shadow-sm">View CV</a>` : '--'}</td>`;
                     bRow += `<td class="text-slate-400 font-bold text-[10px]">${date}</td>`;
                 } else {
                     allKeys.forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 }
 
-                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)]" onclick="event.stopPropagation()">
+                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)] z-10" onclick="event.stopPropagation()">
                             <div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div>
                          </td></tr>`;
                 body.innerHTML += bRow;
@@ -380,63 +379,60 @@
                 return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
             }
             if (k.toLowerCase().includes('ctc') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('salary')) {
-                return `<span class="font-bold text-slate-800">₹${v.toLocaleString()}</span>`;
+                return `<span class="font-bold text-slate-800">₹${Number(v).toLocaleString()}</span>`;
             }
             return v;
         }
 
         function renderActions(row, i) {
-            let html = `<button onclick="runAiRank(${i})" class="action-btn text-teal-600" title="Gemini Analysis"><i class="ph ph-sparkle-fill text-base"></i></button>`;
+            let html = `<button onclick="runAiRank(${i})" class="action-btn text-teal-600" title="Gemini Rank"><i class="ph ph-sparkle-fill text-base"></i></button>`;
             
-            // Job Board Sharing JD
             if (currentTab === 'Job Board') {
-                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
                 html += `<button onclick="compose('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-500" title="Email JD"><i class="ph ph-envelope-simple text-base"></i></button>`;
             }
             
-            // Client Messaging
             if (currentTab === 'Clients') {
-                html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WhatsApp Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+                html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WA Message"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
             }
 
-            // Candidate/Source Actions
-            if (currentTab === 'Candidates' || currentTab === 'Sourced' || drillDown.type === 'job-candidates') {
-                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+            if (currentTab === 'Candidates' || currentTab === 'Sourced' || currentTab === 'Interview Tracker' || drillDown.type === 'job-candidates') {
+                html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
                 html += `<button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
-                html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Schedule Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
+                html += `<button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             }
+
+            if (currentTab === 'Dashboard and Billing') {
+                html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="Payment Reminder"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
+            }
+
             return html;
         }
 
-        // --- COMMUNICATION ENGINE ---
+        // --- COMM ENGINE ---
         async function compose(key, idx) {
             showLoader(true);
             const row = filteredData[idx];
             try {
-                // Pre-map the context to ensure "flow"
                 const rowData = {
                     ...row,
                     TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS,
                     LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC,
                     CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION
                 };
-
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
-                
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.COMPANY_NAME || "Record";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject;
                 document.getElementById('messageBody').value = res.message;
-                
-                const rawPh = (res.phone || row.PHONE || "").toString().replace(/\D/g, '');
+                const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
                 document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
-                
                 openModal('messageModal');
-            } catch (err) { alert("Data fetch error."); }
+            } catch (err) { alert("Message fetch error."); }
             showLoader(false);
         }
 
@@ -452,8 +448,8 @@
             const lbl = document.getElementById('intLocLabel');
             const inp = document.getElementById('intLocation');
             if (fmt === 'Google Meet') { lbl.innerText = "Meeting Link"; inp.value = "https://meet.google.com/vcj-dfaf-pcc"; }
-            else if (fmt === 'Telephonic') { lbl.innerText = "Phone Number"; inp.value = filteredData[activeRowIdx]?.PHONE || ""; }
-            else { lbl.innerText = "Office Address"; inp.value = "Hiregrow Office, Kalyan Nagar, Bangalore"; }
+            else if (fmt === 'Telephonic') { lbl.innerText = "Phone Number"; inp.value = filteredData[activeRowIdx]?.PHONE || filteredData[activeRowIdx]?.SOURCED_PHONE || ""; }
+            else { lbl.innerText = "Office Address"; inp.value = "Hiregrow Consultants, Kalyan Nagar, Bangalore"; }
         }
 
         async function submitInterviewInvite() {
@@ -486,7 +482,7 @@
             } catch (err) { document.getElementById('aiContent').innerText = "AI Service Unavailable."; }
         }
 
-        // --- NAVIGATION HELPERS ---
+        // --- HELPERS ---
         function handleFilter() {
             const q = document.getElementById('globalSearch').value.toLowerCase();
             renderUI();
@@ -503,7 +499,7 @@
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Found " + (res.jobs?.length || 0) + " jobs.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Data flow verified.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
