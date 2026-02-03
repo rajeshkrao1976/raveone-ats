@@ -18,12 +18,11 @@
         /* High-Density Reference Styled Table */
         .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .odoo-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; }
-        .odoo-table td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
+        .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; white-space: normal; }
         .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
         
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         
-        /* UI Overlays */
         #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-purple); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -36,27 +35,22 @@
         
         .breadcrumb-item:hover { color: var(--odoo-teal); cursor: pointer; text-decoration: underline; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
-    <!-- Global Loader -->
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Raveone intelligence</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Google Sheets Data</p>
     </div>
 
-    <!-- Navigation Header -->
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-6 h-full">
             <div class="flex items-center gap-2 cursor-pointer" onclick="resetNavigation()">
                 <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5" alt="Logo">
                 <div class="flex flex-col leading-none">
                     <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
-                    <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase">Consultants</span>
+                    <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase text-white/80">Consultants</span>
                 </div>
             </div>
             <nav class="flex gap-4 h-full text-[10px] font-bold uppercase tracking-wider" id="mainNav">
@@ -77,7 +71,6 @@
         </div>
     </header>
 
-    <!-- Subheader: Breadcrumbs & Filters -->
     <div class="bg-white py-2 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
@@ -90,23 +83,22 @@
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all ml-6">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active records..." class="w-full bg-transparent py-1.5 text-xs outline-none">
+            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
         </div>
     </div>
 
-    <!-- Data Table Container -->
     <div class="flex-1 overflow-auto bg-white scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed">
+        <table class="odoo-table w-full text-left table-fixed min-w-[3500px]" id="dataTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
         <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
             <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
-            <p class="font-bold uppercase tracking-widest text-xs">No matching records found</p>
+            <p class="font-bold uppercase tracking-widest text-xs">No records found in this sheet</p>
         </div>
     </div>
 
-    <!-- MODAL: Interview Scheduler -->
+    <!-- Modals -->
     <div id="interviewModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
@@ -144,7 +136,6 @@
         </div>
     </div>
 
-    <!-- MODAL: Message Preview -->
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
@@ -156,12 +147,12 @@
             </div>
             <div class="p-6 space-y-4">
                 <div id="emailSubjectContainer" class="text-left">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
-                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block text-left">Subject Line</label>
+                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700 text-left"></div>
                 </div>
                 <div class="text-left">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Content</label>
-                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none shadow-inner scrollbar-hide"></textarea>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-teal-500 outline-none shadow-inner"></textarea>
                 </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
@@ -181,16 +172,15 @@
     </div>
 
     <!-- AI Sidebar (Gemini) -->
-    <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l border-slate-200 flex flex-col">
+    <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[1500] transform translate-x-full transition-transform duration-300 border-l border-slate-200 flex flex-col text-left">
         <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
             <h3 class="font-bold text-teal-700 text-[10px] flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini Analysis</h3>
             <button onclick="closeAi()"><i class="ph ph-x text-xl text-slate-400"></i></button>
         </div>
-        <div id="aiContent" class="p-6 flex-1 overflow-auto text-[11px] text-left leading-relaxed text-slate-600 italic">Select record...</div>
+        <div id="aiContent" class="p-6 flex-1 overflow-auto text-[11px] leading-relaxed text-slate-600 italic">Select record...</div>
     </div>
 
     <script>
-        // --- CORE LOGIC ---
         const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
         
         let currentTab = 'Job Board';
@@ -219,7 +209,7 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message || "Website Sync Complete.");
+                alert(res.message);
                 refreshData();
             } catch (err) { alert("Sync failed."); }
             showLoader(false);
@@ -279,11 +269,15 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates' || currentTab === 'Sourced');
+            const firstRow = filteredData[0];
+            const allKeys = Object.keys(firstRow).filter(k => !k.startsWith('_'));
+
+            // Check if we should use the "Compact Reference Layout" (Grouped Mode)
+            const isGroupedView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates' || currentTab === 'Sourced');
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             
-            if (isCandidatesView) {
+            if (isGroupedView) {
                 headerHtml += `
                     <th class='w-28'>App ID</th>
                     <th class='w-64'>Candidate</th>
@@ -293,15 +287,9 @@
                     <th class='w-64'>Notice & Location</th>
                     <th class='w-24 text-center'>Docs</th>
                     <th class='w-32'>Applied On</th>`;
-            } else if (currentTab === 'Job Board') {
-                headerHtml += `<th>Job ID</th><th>Role Details</th><th>Client Details</th><th>Experience & CTC</th><th>Status & Type</th><th>Posted</th>`;
-            } else if (currentTab === 'Clients') {
-                headerHtml += `<th>Client ID</th><th>Company</th><th>Primary Contact</th><th>Address & Website</th><th>Status</th>`;
-            } else if (currentTab === 'Dashboard and Billing') {
-                headerHtml += `<th>Client/Candidate</th><th>Dates</th><th>Commercials</th><th>Status</th>`;
             } else {
-                const cols = Object.keys(filteredData[0]).filter(k => !k.startsWith('_'));
-                cols.forEach(c => headerHtml += `<th>${c.replace(/_/g, ' ')}</th>`);
+                // PURELY DYNAMIC: Use only fields available in backend
+                allKeys.forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
             headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-28 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]'>Actions Bar</th></tr>";
@@ -309,60 +297,58 @@
 
             filteredData.forEach((row, i) => {
                 let rowClick = '';
-                if (currentTab === 'Clients') rowClick = `setDrillDown('client-jobs', '${row.CLIENT_ID}', '${row.COMPANY_NAME}')`;
-                else if (currentTab === 'Job Board') rowClick = `setDrillDown('job-candidates', '${row.JOB_ID}', '${row.POSITION_TITLE}')`;
+                if (currentTab === 'Clients') rowClick = `setDrillDown('client-jobs', '${row.CLIENT_ID || row.Client_ID}', '${row.COMPANY_NAME || row.Company_Name}')`;
+                else if (currentTab === 'Job Board') rowClick = `setDrillDown('job-candidates', '${row.JOB_ID || row.Job_ID}', '${row.POSITION_TITLE || row.Position_Title}')`;
 
                 let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${rowClick}">`;
                 bRow += `<td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
 
-                if (isCandidatesView) {
-                    bRow += `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.APP_ID || row.CANDIDATE_ID || '--'}</td>`;
+                if (isGroupedView) {
+                    // Grouped Logic based on Reference Code
+                    const appId = row.APP_ID || row.APPID || row.CANDIDATE_ID || '--';
+                    const name = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || '--';
+                    const email = row.EMAIL || row.SOURCED_EMAIL || '--';
+                    const phone = row.PHONE || row.SOURCED_PHONE || '--';
+                    const jobTitle = row.JOB_TITLE || row.POSITION_TITLE || '--';
+                    const jobId = row.JOB_ID || '--';
+                    const totalExp = row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '--';
+                    const relExp = row.RELEVANT_EXPERIENCE || row.RELEVANT_EXPERIENCE_YRS || '--';
+                    const expCtc = row.EXPECTED_CTC || '--';
+                    const curCtc = row.CURRENT_CTC || row.LAST_DRAWN_CTC || '--';
+                    const notice = row.NOTICE_PERIOD || '--';
+                    const location = row.CURRENT_LOCATION || row.LOCATION || row.JOB_LOCATION || '--';
+                    const resume = row.RESUME_LINK || row.Resumelink || '';
+                    const date = row.SUBMITTED_DATE || row.APPLIED_DATE || row.OUTREACH_DATE || '--';
+
+                    bRow += `<td class="font-mono text-[10px] text-slate-400 uppercase">${appId}</td>`;
                     bRow += `<td>
-                                <div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_NAME || row.CANDIDATE_SOURCED}</div>
-                                <div class="text-[10px] text-slate-400">${row.EMAIL || row.SOURCED_EMAIL || '--'}</div>
-                                <div class="text-[10px] text-[#714B67] font-bold">${row.PHONE || row.SOURCED_PHONE || '--'}</div>
+                                <div class="font-bold text-slate-900 leading-tight">${name}</div>
+                                <div class="text-[10px] text-slate-400">${email}</div>
+                                <div class="text-[10px] text-[#714B67] font-bold">${phone}</div>
                              </td>`;
                     bRow += `<td>
-                                <div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div>
-                                <div class="text-[9px] text-slate-400 uppercase font-bold">${row.JOB_ID || '--'}</div>
+                                <div class="font-semibold text-slate-700 leading-tight">${jobTitle}</div>
+                                <div class="text-[9px] text-slate-400 uppercase font-bold">${jobId}</div>
                              </td>`;
                     bRow += `<td>
-                                <div class="text-slate-600 font-medium">Total: ${row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '0'} Yrs</div>
-                                <div class="text-[10px] text-slate-400 italic">Rel: ${row.RELEVANT_EXPERIENCE || row.RELEVANT_EXPERIENCE_YRS || '0'} Yrs</div>
+                                <div class="text-slate-600 font-medium">Total: ${totalExp} Yrs</div>
+                                <div class="text-[10px] text-slate-400 italic">Rel: ${relExp} Yrs</div>
                              </td>`;
                     bRow += `<td>
-                                <div class="text-emerald-700 font-bold">Exp: ${row.EXPECTED_CTC || '--'}</div>
-                                <div class="text-[9px] text-slate-400">Curr: ${row.CURRENT_CTC || row.LAST_DRAWN_CTC || '--'}</div>
+                                <div class="text-emerald-700 font-bold">Exp: ${expCtc}</div>
+                                <div class="text-[9px] text-slate-400">Curr: ${curCtc}</div>
                              </td>`;
                     bRow += `<td>
-                                <div class="text-slate-600 font-medium">${row.NOTICE_PERIOD || '--'}</div>
-                                <div class="text-[10px] text-slate-400">${row.CURRENT_LOCATION || row.LOCATION || '--'}</div>
+                                <div class="text-slate-600 font-medium">${notice}</div>
+                                <div class="text-[10px] text-slate-400">${location}</div>
                              </td>`;
                     bRow += `<td class='text-center'>
-                                ${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100 shadow-sm">View CV</a>` : '--'}
+                                ${resume ? `<a href="${resume}" target="_blank" onclick="event.stopPropagation()" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">View CV</a>` : '--'}
                              </td>`;
-                    bRow += `<td class="text-slate-400 font-bold text-[10px]">${row.SUBMITTED_DATE || row.APPLIED_DATE || row.OUTREACH_DATE || '--'}</td>`;
-                } else if (currentTab === 'Job Board') {
-                    bRow += `<td class='font-mono text-xs'>${row.JOB_ID}</td>`;
-                    bRow += `<td><div class='font-bold text-slate-900'>${row.POSITION_TITLE}</div><div class='text-[10px] text-slate-400 italic'>${row.LOCATION}</div></td>`;
-                    bRow += `<td><div class='font-bold text-teal-700'>${row.CLIENT_ID}</div></td>`;
-                    bRow += `<td><div class='text-slate-600 font-medium'>Exp: ${row.EXPERIENCE_REQUIRED}</div><div class='text-[10px] text-slate-400'>Budget: ${row.CTC_RANGE}</div></td>`;
-                    bRow += `<td>${renderCell('JOB_STATUS', row.JOB_STATUS)} <br> <span class='text-[9px] text-slate-400'>${row.JOB_TYPE || 'Full-time'}</span></td>`;
-                    bRow += `<td class='text-[10px] text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
-                } else if (currentTab === 'Clients') {
-                    bRow += `<td class='font-mono text-xs'>${row.CLIENT_ID}</td>`;
-                    bRow += `<td><div class='font-bold text-slate-900'>${row.COMPANY_NAME}</div></td>`;
-                    bRow += `<td><div class='font-bold text-slate-700'>${row.CONTACT_NAME || '--'}</div><div class='text-[10px] text-slate-400'>${row.EMAIL}</div><div class='text-[10px] text-teal-600 font-bold'>${row.PHONE}</div></td>`;
-                    bRow += `<td><div class='text-[10px] text-slate-500'>${row.ADDRESS || '--'}</div><div class='text-[9px] text-blue-500 font-bold'>${row.WEBSITE || '--'}</div></td>`;
-                    bRow += `<td>${renderCell('CLIENT_STATUS', row.CLIENT_STATUS)}</td>`;
-                } else if (currentTab === 'Dashboard and Billing') {
-                    bRow += `<td><div class='font-bold text-slate-900'>${row.CLIENT_NAME}</div><div class='text-[10px] text-slate-500'>${row.CANDIDATE_NAME}</div></td>`;
-                    bRow += `<td><div class='text-[10px] font-bold text-slate-700'>Joined: ${row.JOINING_DATE}</div></td>`;
-                    bRow += `<td><div class='text-emerald-700 font-bold'>Amt: ₹${Number(row.BILLING_AMOUNT || 0).toLocaleString()}</div><div class='text-[9px] text-slate-400 italic'>Comm: ${row.PERCENTAGE_COMMISSION}%</div></td>`;
-                    bRow += `<td>${renderCell('PAYMENT_STATUS', row.PAYMENT_STATUS)}</td>`;
+                    bRow += `<td class="text-slate-400 font-bold text-[10px]">${date}</td>`;
                 } else {
-                    const cols = Object.keys(row).filter(k => !k.startsWith('_'));
-                    cols.forEach(c => bRow += `<td>${renderCell(c, row[c])}</td>`);
+                    // PURELY DYNAMIC: Loop only through available backend keys
+                    allKeys.forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 }
 
                 bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)]" onclick="event.stopPropagation()">
@@ -372,21 +358,23 @@
             });
         }
 
-        function renderCell(k, v) {
+        function renderValue(k, v) {
             if (!v && v !== 0) return "<span class='text-slate-200'>--</span>";
-            if (k.includes('STATUS')) {
+            if (k.toLowerCase().includes('status')) {
                 const s = String(v).toLowerCase();
                 let cls = "bg-slate-100 text-slate-500 border-slate-200";
-                if (['open', 'active', 'hired', 'hot', 'submitted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
+                if (['open', 'active', 'hired', 'submitted', 'hot'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
                 if (['rejected', 'cold', 'dropped', 'off'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
                 return `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border ${cls}">${v}</span>`;
             }
-            if (k.includes('AMOUNT') || k.includes('CTC')) return `<span class="font-bold text-slate-800 tracking-tight">₹${Number(v).toLocaleString()}</span>`;
+            if (k.toLowerCase().includes('ctc') || k.toLowerCase().includes('amount') || k.toLowerCase().includes('salary')) {
+                return `<span class="font-bold text-slate-800">₹${v.toLocaleString()}</span>`;
+            }
             return v;
         }
 
         function renderActions(row, i) {
-            let html = `<button onclick="runAiRank(${i})" class="action-btn text-teal-600" title="Gemini Rank"><i class="ph ph-sparkle-fill text-base"></i></button>`;
+            let html = `<button onclick="runAiRank(${i})" class="action-btn text-teal-600" title="Gemini Analysis"><i class="ph ph-sparkle-fill text-base"></i></button>`;
             if (currentTab === 'Candidates' || currentTab === 'Sourced' || drillDown.type === 'job-candidates') {
                 html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
                 html += `<button onclick="composeMessage('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button>`;
@@ -395,23 +383,16 @@
             return html;
         }
 
-        // --- NAVIGATION ---
-        function setDrillDown(type, id, label) { drillDown = { type, id, label }; renderUI(); }
-        function resetNavigation() { drillDown = { type: null, id: null, label: null }; renderUI(); }
-        function drillBack() { resetNavigation(); }
-
-        // --- COMMUNICATION ---
+        // --- COMMUNICATION ENGINE ---
         async function composeMessage(key, idx) {
             showLoader(true);
             const row = filteredData[idx];
-            // Ensure fields flow for snapshot
-            const rowData = { ...row };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: row }) });
                 const res = await resp.json();
                 
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
-                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || "Applicant Record";
+                document.getElementById('modalSubtitle').innerText = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || "Applicant";
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject;
                 document.getElementById('messageBody').value = res.message;
@@ -422,7 +403,7 @@
                 document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
                 
                 openModal('messageModal');
-            } catch (err) { alert("Data flow failed for communication template."); }
+            } catch (err) { alert("Data fetch error for templates."); }
             showLoader(false);
         }
 
@@ -456,7 +437,7 @@
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
                 openModal('messageModal');
-            } catch (err) { alert("Interview generation error."); }
+            } catch (err) { alert("Failed to generate invite."); }
             showLoader(false);
         }
 
@@ -464,12 +445,12 @@
             const row = filteredData[idx];
             const job = fullData.jobs.find(j => j.JOB_ID === row.JOB_ID) || fullData.jobs[0];
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing fitment...</div>`;
+            document.getElementById('aiContent').innerHTML = `<div class='py-20 text-center animate-pulse text-slate-400'><i class='ph ph-sparkle text-3xl mb-3 text-teal-600 block mx-auto'></i>Analyzing candidate fitment...</div>`;
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: row, jobData: job }) });
                 const res = await resp.json();
                 document.getElementById('aiContent').innerHTML = `<div class='mb-4 font-black text-slate-800 uppercase tracking-widest text-[9px] border-b pb-1'>Verdict for ${row.CANDIDATE_NAME || "Candidate"}</div><div class='whitespace-pre-wrap text-slate-700 text-[11px] leading-relaxed'>${res.analysis}</div>`;
-            } catch (err) { document.getElementById('aiContent').innerText = "AI Ranking Service Offline."; }
+            } catch (err) { document.getElementById('aiContent').innerText = "AI Service Unavailable."; }
         }
 
         // --- UI HELPERS ---
@@ -484,14 +465,14 @@
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
-        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied to clipboard!"); }
+        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Message copied to clipboard!"); }
         async function testConnection() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database is live.");
-            } catch (e) { alert("❌ Connection failed."); }
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Found " + (res.jobs?.length || 0) + " openings.");
+            } catch (e) { alert("❌ Connection failed. Check Web App URL."); }
             showLoader(false);
         }
         function resetApp() { resetNavigation(); switchTab('Job Board'); }
