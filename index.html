@@ -53,8 +53,8 @@
         <div class="flex flex-col">
             <nav class="text-[9px] font-black text-slate-400 uppercase mb-1">CRM / <span id="breadcrumb" class="text-slate-700 font-bold">Job Board</span></nav>
             <div class="flex items-center gap-2">
-                <button onclick="refreshData()" class="btn-primary">NEW</button>
-                <button class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200">IMPORT</button>
+                <button onclick="refreshData()" class="btn-primary">REFRESH</button>
+                <button class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200" onclick="window.open('https://docs.google.com/spreadsheets/d/1VTdu7j25g0h-IUm6-cjwhCB0WXWgdgToJRwr9ZC4628/edit', '_blank')">OPEN SHEET</button>
             </div>
         </div>
         <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all">
@@ -63,14 +63,24 @@
         </div>
     </div>
 
+    <!-- Connection Warning UI -->
+    <div id="connectionWarning" class="bg-amber-50 border-b border-amber-200 p-3 text-center hidden">
+        <p class="text-xs text-amber-700 font-bold">
+            <i class="ph ph-warning-circle text-lg align-middle mr-2"></i>
+            API URL not configured. Please paste your Apps Script Web App URL into <code class="bg-white px-1 rounded">API_URL</code> in the code.
+        </p>
+    </div>
+
     <div class="flex-1 overflow-auto bg-white scrollbar-hide">
         <table class="odoo-table w-full text-left table-fixed min-w-[1500px]">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
+        
         <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
-            <i class="ph ph-folder-open text-6xl opacity-20 mb-4"></i>
+            <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
             <p class="font-bold uppercase tracking-widest text-xs">No records found</p>
+            <p class="text-[10px] mt-2 italic">Verify your sheet names in the Google Apps Script CONFIG.</p>
         </div>
     </div>
 
@@ -85,7 +95,7 @@
     <div id="loader"><div class="spinner"></div></div>
 
     <script>
-        // REPLACE THIS with your Apps Script Web App URL
+        // CRITICAL: Replace this with your Google Apps Script URL after clicking "Deploy > New Deployment"
         const API_URL = "https://script.google.com/a/macros/raveone.in/s/AKfycbxnIM5256mMmlyRuCiJjWCCDDs3ZILltkDauPcoM0OKBpPckAWq5QX1HvQPlMwLBBPn/exec"; 
         
         let currentView = 'Job Board';
@@ -93,7 +103,10 @@
         let filteredData = [];
 
         async function init() {
-            if (API_URL.includes("PASTE_YOUR")) return;
+            if (API_URL.includes("PASTE_YOUR")) {
+                document.getElementById('connectionWarning').classList.remove('hidden');
+                return;
+            }
             refreshData();
         }
 
@@ -101,9 +114,21 @@
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
-                fullData = await resp.json();
-                switchView(currentView);
-            } catch (err) { console.error("Refresh Error:", err); }
+                if (!resp.ok) throw new Error("API call failed.");
+                
+                const res = await resp.json();
+                
+                if (res.error) {
+                    alert("Backend Error: " + res.error);
+                    console.error(res.error);
+                } else {
+                    fullData = res;
+                    switchView(currentView);
+                }
+            } catch (err) {
+                console.error("Refresh Error:", err);
+                alert("Failed to connect to API. Ensure your script is deployed as a Web App and 'Access' is set to 'Anyone'.");
+            }
             showLoader(false);
         }
 
@@ -122,7 +147,15 @@
             currentView = view;
             document.getElementById('breadcrumb').innerText = view;
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab'));
-            const map = { 'Job Board': 'tab-jobs', 'Sourced': 'tab-sourced', 'Candidates': 'tab-candidates', 'Interview Tracker': 'tab-interviews', 'Clients': 'tab-clients', 'Dashboard and Billing': 'tab-billing' };
+            
+            const map = { 
+                'Job Board': 'tab-jobs', 
+                'Sourced': 'tab-sourced', 
+                'Candidates': 'tab-candidates', 
+                'Interview Tracker': 'tab-interviews', 
+                'Clients': 'tab-clients', 
+                'Dashboard and Billing': 'tab-billing' 
+            };
             if(map[view]) document.getElementById(map[view]).classList.add('active-tab');
 
             const sourceMap = { 
@@ -133,7 +166,8 @@
                 'Clients': fullData.clients, 
                 'Dashboard and Billing': fullData.billing 
             };
-            filteredData = sourceMap[view] || [];
+            
+            filteredData = Array.isArray(sourceMap[view]) ? sourceMap[view] : [];
             renderTable();
         }
 
@@ -143,7 +177,10 @@
             const empty = document.getElementById('noData');
             head.innerHTML = ""; body.innerHTML = "";
 
-            if (!filteredData.length) { empty.classList.remove('hidden'); return; }
+            if (!filteredData.length) { 
+                empty.classList.remove('hidden'); 
+                return; 
+            }
             empty.classList.add('hidden');
 
             const columnConfig = {
@@ -189,6 +226,7 @@
 
         async function runAi(idx, e) {
             e.stopPropagation();
+            if (API_URL.includes("PASTE_YOUR")) { alert("API URL not configured."); return; }
             const record = filteredData[idx];
             let job = currentView === 'Job Board' ? record : (fullData.jobs.find(j => j.JOB_ID === record.JOB_ID) || fullData.jobs[0] || {});
             
@@ -222,12 +260,23 @@
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         
         async function testConnection() {
+            if (API_URL.includes("PASTE_YOUR")) { alert("Paste your Apps Script Web App URL first!"); return; }
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ CRM Connected Successfully!");
-            } catch (e) { alert("❌ Connection failed."); }
+                if (res.error) {
+                    alert("❌ Server responded with error:\n" + res.error);
+                } else if (res.jobs) {
+                    alert("✅ Success! Found " + res.jobs.length + " jobs in Job Board.");
+                    refreshData();
+                } else {
+                    alert("⚠️ Data format mismatch. Check Apps Script logs.");
+                }
+            } catch (e) { 
+                alert("❌ Connection failed. Ensure Web App is deployed with 'Access: Anyone'. Check console for details."); 
+                console.error(e);
+            }
             showLoader(false);
         }
         
