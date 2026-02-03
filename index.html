@@ -43,6 +43,7 @@
         .data-stack-title { font-weight: 700; color: #1e293b; font-size: 11px; margin-bottom: 1px; }
         .data-stack-sub { color: #64748b; font-size: 10px; }
         .data-stack-brand { color: var(--odoo-purple); font-weight: 600; font-size: 10px; }
+        .data-stack-emerald { color: #059669; font-weight: 700; }
     </style>
 </head>
 <body class="main-viewport">
@@ -207,6 +208,18 @@
             switchTab(currentTab);
         };
 
+        // Utility: Fixes "1899" epoch time from Google Sheets to HH:mm
+        function formatSheetTime(val) {
+            if (!val) return '--';
+            const str = String(val);
+            if (str.includes('1899')) {
+                // Extracts HH:mm from "1899-12-30 11:00:00"
+                const parts = str.split(' ');
+                if (parts.length > 1) return parts[1].substring(0, 5);
+            }
+            return str;
+        }
+
         async function refreshData() {
             showLoader(true);
             try {
@@ -277,8 +290,8 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            // CLEAN BLANK ROWS: Filter out rows that are effectively empty (no IDs or names)
-            filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.INTERVIEW_ID);
+            // CLEAN BLANK ROWS: Filter logic adjusted to include billing (CLIENT_NAME/BILLING_AMOUNT)
+            filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.INTERVIEW_ID || r.CLIENT_NAME || r.BILLING_AMOUNT);
             renderTable();
         }
 
@@ -291,23 +304,26 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            const firstRow = filteredData[0];
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
             const isSourcedView = (currentTab === 'Sourced');
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
             const isInterviews = (currentTab === 'Interview Tracker');
+            const isBilling = (currentTab === 'Dashboard and Billing');
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             
             if (isCandidatesView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-48'>Current Status</th><th class='w-24 text-center'>Docs</th>`;
+                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-48'>Status</th><th class='w-24 text-center'>Docs</th>`;
             } else if (isSourcedView) {
                 headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Status</th><th class='w-32'>Sourced On</th>`;
             } else if (isJobBoard) {
                 headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
             } else if (isInterviews) {
                 headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-40'>Next Step</th>`;
+            } else if (isBilling) {
+                headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joining Date</th><th class='w-48'>Financials</th><th class='w-40'>Payment Status</th>`;
             } else {
+                const firstRow = filteredData[0];
                 Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
@@ -337,8 +353,13 @@
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td>`;
                     bRow += `<td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td>`;
                     bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td>`;
-                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${row.INTERVIEW_TIME || '--'}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td>`;
+                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${formatSheetTime(row.INTERVIEW_TIME)}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td>`;
                     bRow += `<td><div class='data-stack-sub font-bold'>${row.NEXT_STEP || '--'}</div></td>`;
+                } else if (isBilling) {
+                    bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || '--'}</div></td>`;
+                    bRow += `<td class='font-bold text-slate-700'>${row.JOINING_DATE || '--'}</td>`;
+                    bRow += `<td><div class='data-stack-emerald'>₹${Number(row.BILLING_AMOUNT || 0).toLocaleString()}</div><div class='data-stack-sub'>Comm: ${row.PERCENTAGE_COMMISSION || '--'}%</div></td>`;
+                    bRow += `<td>${renderValue('PAYMENT_STATUS', row.PAYMENT_STATUS)}</td>`;
                 } else {
                     Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 }
@@ -462,7 +483,7 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides: overrides }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
