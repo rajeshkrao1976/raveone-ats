@@ -21,6 +21,8 @@
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-teal); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .logo-img { height: 28px; width: 28px; object-fit: contain; border-radius: 4px; background: white; }
+        .modal-overlay { @apply fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 transition-all opacity-0 pointer-events-none; }
+        .modal-overlay.open { @apply opacity-100 pointer-events-auto; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -63,39 +65,66 @@
         </div>
     </div>
 
-    <!-- Connection Warning UI -->
-    <div id="connectionWarning" class="bg-amber-50 border-b border-amber-200 p-3 text-center hidden">
-        <p class="text-xs text-amber-700 font-bold">
-            <i class="ph ph-warning-circle text-lg align-middle mr-2"></i>
-            API URL not configured. Please paste your Apps Script Web App URL into <code class="bg-white px-1 rounded">API_URL</code> in the code.
-        </p>
-    </div>
-
     <div class="flex-1 overflow-auto bg-white scrollbar-hide">
-        <table class="odoo-table w-full text-left table-fixed min-w-[1500px]">
+        <table class="odoo-table w-full text-left table-fixed min-w-[2000px]">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
-        
         <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
-            <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
+            <i class="ph ph-folder-open text-6xl opacity-20 mb-4"></i>
             <p class="font-bold uppercase tracking-widest text-xs">No records found</p>
-            <p class="text-[10px] mt-2 italic">Verify your sheet names in the Google Apps Script CONFIG.</p>
         </div>
     </div>
 
+    <!-- Message Composer -->
+    <div id="messageModal" class="modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform translate-y-4 transition-all duration-300">
+            <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
+                <div>
+                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm">Message Preview</h3>
+                    <p id="modalSubtitle" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Generating Content...</p>
+                </div>
+                <button onclick="closeModal('messageModal')" class="p-2 hover:bg-slate-200 rounded-full transition-all"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div id="emailSubjectContainer">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject</label>
+                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Body</label>
+                    <textarea id="messageBody" class="w-full h-64 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20"></textarea>
+                </div>
+            </div>
+            <div class="p-5 bg-slate-50 border-t flex items-center justify-between">
+                <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-teal-600 uppercase tracking-widest flex items-center gap-2">
+                    <i class="ph ph-copy text-lg"></i> Copy to Clipboard
+                </button>
+                <div class="flex gap-2">
+                    <button id="waActionBtn" class="bg-emerald-600 text-white px-4 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+                        <i class="ph ph-whatsapp-logo text-lg"></i> Open WA
+                    </button>
+                    <button id="emailActionBtn" class="bg-indigo-600 text-white px-4 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+                        <i class="ph ph-envelope text-lg"></i> Send Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Sidebar -->
     <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 border-l flex flex-col">
         <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
             <h3 class="font-bold text-teal-700 text-xs flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini AI</h3>
             <button onclick="closeAi()"><i class="ph ph-x text-xl"></i></button>
         </div>
-        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm leading-relaxed text-slate-600 italic">Select a record to start analysis...</div>
+        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm leading-relaxed text-slate-600 italic">Select a record...</div>
     </div>
 
     <div id="loader"><div class="spinner"></div></div>
 
     <script>
-        // CRITICAL: Replace this with your Google Apps Script URL after clicking "Deploy > New Deployment"
+        // REPLACE THIS with your Apps Script Web App URL
         const API_URL = "https://script.google.com/macros/s/AKfycbxgk8IyALUWZnZKke0A530lXQ4qyV48wmnIwXumWqF5XwM4nmwHBNd_-6u_cfoYKv2b/exec"; 
         
         let currentView = 'Job Board';
@@ -103,10 +132,7 @@
         let filteredData = [];
 
         async function init() {
-            if (API_URL.includes("PASTE_YOUR")) {
-                document.getElementById('connectionWarning').classList.remove('hidden');
-                return;
-            }
+            if (API_URL.includes("PASTE_YOUR")) return;
             refreshData();
         }
 
@@ -114,21 +140,9 @@
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
-                if (!resp.ok) throw new Error("API call failed.");
-                
-                const res = await resp.json();
-                
-                if (res.error) {
-                    alert("Backend Error: " + res.error);
-                    console.error(res.error);
-                } else {
-                    fullData = res;
-                    switchView(currentView);
-                }
-            } catch (err) {
-                console.error("Refresh Error:", err);
-                alert("Failed to connect to API. Ensure your script is deployed as a Web App and 'Access' is set to 'Anyone'.");
-            }
+                fullData = await resp.json();
+                switchView(currentView);
+            } catch (err) { console.error(err); }
             showLoader(false);
         }
 
@@ -147,27 +161,11 @@
             currentView = view;
             document.getElementById('breadcrumb').innerText = view;
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab'));
-            
-            const map = { 
-                'Job Board': 'tab-jobs', 
-                'Sourced': 'tab-sourced', 
-                'Candidates': 'tab-candidates', 
-                'Interview Tracker': 'tab-interviews', 
-                'Clients': 'tab-clients', 
-                'Dashboard and Billing': 'tab-billing' 
-            };
+            const map = { 'Job Board': 'tab-jobs', 'Sourced': 'tab-sourced', 'Candidates': 'tab-candidates', 'Interview Tracker': 'tab-interviews', 'Clients': 'tab-clients', 'Dashboard and Billing': 'tab-billing' };
             if(map[view]) document.getElementById(map[view]).classList.add('active-tab');
 
-            const sourceMap = { 
-                'Job Board': fullData.jobs, 
-                'Sourced': fullData.sourced, 
-                'Candidates': fullData.candidates, 
-                'Interview Tracker': fullData.interviews, 
-                'Clients': fullData.clients, 
-                'Dashboard and Billing': fullData.billing 
-            };
-            
-            filteredData = Array.isArray(sourceMap[view]) ? sourceMap[view] : [];
+            const sourceMap = { 'Job Board': fullData.jobs, 'Sourced': fullData.sourced, 'Candidates': fullData.candidates, 'Interview Tracker': fullData.interviews, 'Clients': fullData.clients, 'Dashboard and Billing': fullData.billing };
+            filteredData = sourceMap[view] || [];
             renderTable();
         }
 
@@ -177,34 +175,79 @@
             const empty = document.getElementById('noData');
             head.innerHTML = ""; body.innerHTML = "";
 
-            if (!filteredData.length) { 
-                empty.classList.remove('hidden'); 
-                return; 
-            }
+            if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
             const columnConfig = {
-                'Job Board': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'JOB_STATUS', 'LOCATION', 'EXPERIENCE_REQUIRED', 'CTC_RANGE', 'OPENINGS_COUNT', 'PIPELINE'],
+                'Job Board': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'JOB_STATUS', 'LOCATION', 'EXPERIENCE_REQUIRED', 'CTC_RANGE'],
                 'Sourced': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'CANDIDATE_SOURCED', 'SOURCED_EMAIL', 'SOURCED_PHONE', 'OUTREACH_DATE', 'STATUS'],
-                'Candidates': ['CANDIDATE_ID', 'CANDIDATE_NAME', 'POSITION_TITLE', 'CURRENT_STATUS', 'TOTAL_EXPERIENCE_YRS', 'SUBMITTED_DATE', 'PHONE', 'EMAIL'],
+                'Candidates': ['JOB_ID', 'APP_ID', 'CLIENT_ID', 'JOB_TITLE', 'JOB_LOCATION', 'CURRENT_STATUS', 'CANDIDATE_NAME', 'PHONE', 'EMAIL', 'EDUCATION', 'TOTAL_EXPERIENCE_YRS', 'RELEVANT_EXPERIENCE_YRS', 'CURRENT_CTC', 'EXPECTED_CTC', 'NOTICE_PERIOD', 'CURRENT_LOCATION', 'SUBMITTED_DATE'],
                 'Interview Tracker': ['INTERVIEW_ID', 'CANDIDATE_NAME', 'COMPANY_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'],
                 'Clients': ['CLIENT_ID', 'COMPANY_NAME', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'WEBSITE', 'CLIENT_STATUS'],
-                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE']
+                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS']
             };
 
-            const cols = columnConfig[currentView] || Object.keys(filteredData[0]).filter(k => k !== '_ROW').slice(0, 8);
+            const cols = columnConfig[currentView] || Object.keys(filteredData[0]).filter(k => k !== '_ROW').slice(0, 10);
             let hRow = "<tr><th class='w-12 px-4'><input type='checkbox'></th>";
             cols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
-            hRow += "<th class='text-right px-6'>AI</th></tr>";
+            hRow += "<th class='text-right px-6'>Actions</th></tr>";
             head.innerHTML = hRow;
 
             filteredData.forEach((row, i) => {
-                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50">`;
+                let bRow = `<tr class="border-b transition-colors">`;
                 bRow += `<td class='px-4'><input type='checkbox'></td>`;
                 cols.forEach(c => bRow += `<td>${formatVal(c, row[c])}</td>`);
-                bRow += `<td class="text-right px-6"><button onclick="runAi(${i}, event)" class="text-teal-600 hover:scale-125 transition-all p-1"><i class="ph ph-sparkle-fill text-lg"></i></button></td></tr>`;
+                bRow += `<td class="text-right px-6 shrink-0"><div class="flex items-center justify-end gap-1.5">${getActionButtons(row, i)}</div></td></tr>`;
                 body.innerHTML += bRow;
             });
+        }
+
+        function getActionButtons(row, i) {
+            let html = `<button onclick="runAi(${i}, event)" class="p-1.5 rounded transition-all flex items-center justify-center hover:scale-110 text-teal-600" title="AI Ranking"><i class="ph ph-sparkle-fill text-lg"></i></button>`;
+            
+            if (currentView === 'Candidates' || currentView === 'Sourced') {
+                html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE', ${i})" class="p-1.5 rounded transition-all flex items-center justify-center hover:scale-110 text-indigo-600" title="Share JD"><i class="ph ph-envelope-simple text-lg"></i></button>`;
+                html += `<button onclick="composeMessage('CANDIDATE_JD_SHARE_WA', ${i})" class="p-1.5 rounded transition-all flex items-center justify-center hover:scale-110 text-emerald-600" title="WhatsApp JD"><i class="ph ph-whatsapp-logo text-lg"></i></button>`;
+            } else if (currentView === 'Interview Tracker') {
+                html += `<button onclick="composeMessage('CANDIDATE_STATUS_UPDATE_WA', ${i})" class="p-1.5 rounded transition-all flex items-center justify-center hover:scale-110 text-emerald-600" title="Status Update"><i class="ph ph-whatsapp-logo text-lg"></i></button>`;
+            }
+
+            return html;
+        }
+
+        async function composeMessage(key, idx) {
+            showLoader(true);
+            const rowData = filteredData[idx];
+            try {
+                const resp = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData })
+                });
+                const res = await resp.json();
+                
+                document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
+                document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME || "Record";
+                
+                if (key.includes('WA')) {
+                    document.getElementById('emailSubjectContainer').classList.add('hidden');
+                } else {
+                    document.getElementById('emailSubjectContainer').classList.remove('hidden');
+                    document.getElementById('emailSubject').innerText = res.subject;
+                }
+
+                document.getElementById('messageBody').value = res.message;
+                const cleanPhone = (res.phone || "").toString().replace(/\D/g, '');
+                const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                
+                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(res.message)}`, '_blank');
+                document.getElementById('emailActionBtn').onclick = () => {
+                    const recipient = rowData.EMAIL || "";
+                    window.open(`mailto:${recipient}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+                };
+
+                openModal('messageModal');
+            } catch (err) { alert("Message Generation Error."); }
+            showLoader(false);
         }
 
         function formatVal(k, v) {
@@ -213,8 +256,7 @@
             if (k.includes('STATUS') || k.includes('PRIORITY')) {
                 let cls = "bg-slate-100 text-slate-500";
                 if (['open', 'active', 'hired', 'hot', 'submitted', 'shortlisted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
-                if (['rejected', 'cold', 'dropped', 'off'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
-                if (['warm', 'sourced', 'interested'].includes(s)) cls = "bg-amber-50 text-amber-700 border-amber-100";
+                if (['rejected', 'cold', 'dropped'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
                 return `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase border ${cls}">${v}</span>`;
             }
             if (k.includes('AMOUNT') || k.includes('CTC')) {
@@ -226,26 +268,15 @@
 
         async function runAi(idx, e) {
             e.stopPropagation();
-            if (API_URL.includes("PASTE_YOUR")) { alert("API URL not configured."); return; }
             const record = filteredData[idx];
             let job = currentView === 'Job Board' ? record : (fullData.jobs.find(j => j.JOB_ID === record.JOB_ID) || fullData.jobs[0] || {});
-            
             document.getElementById('aiDrawer').classList.remove('translate-x-full');
             document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-4"></div><p class="text-[10px] uppercase font-bold text-slate-400">Analyzing Fitment...</p></div>`;
-
             try {
-                const resp = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'aiRank', candidateData: record, jobData: job }) 
-                });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'aiRank', candidateData: record, jobData: job }) });
                 const res = await resp.json();
-                document.getElementById('aiContent').innerHTML = `
-                    <div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest">Analysis for ${job.POSITION_TITLE || "Role"}</div>
-                    <div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed">${res.analysis || "No analysis returned."}</div>
-                `;
-            } catch (err) {
-                document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">AI Analysis Error.</div>`;
-            }
+                document.getElementById('aiContent').innerHTML = `<div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest">Analysis for ${job.POSITION_TITLE || "Role"}</div><div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed">${res.analysis}</div>`;
+            } catch (err) { document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">Error.</div>`; }
         }
 
         function handleSearch() {
@@ -256,30 +287,26 @@
             renderTable();
         }
 
+        function copyMessage() {
+            const body = document.getElementById('messageBody');
+            body.select();
+            document.execCommand('copy');
+            alert("Copied to clipboard!");
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
-        
         async function testConnection() {
-            if (API_URL.includes("PASTE_YOUR")) { alert("Paste your Apps Script Web App URL first!"); return; }
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                if (res.error) {
-                    alert("❌ Server responded with error:\n" + res.error);
-                } else if (res.jobs) {
-                    alert("✅ Success! Found " + res.jobs.length + " jobs in Job Board.");
-                    refreshData();
-                } else {
-                    alert("⚠️ Data format mismatch. Check Apps Script logs.");
-                }
-            } catch (e) { 
-                alert("❌ Connection failed. Ensure Web App is deployed with 'Access: Anyone'. Check console for details."); 
-                console.error(e);
-            }
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected Successfully!");
+            } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
-        
         window.onload = init;
     </script>
 </body>
