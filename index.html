@@ -211,7 +211,6 @@
             if (!val) return '--';
             const str = String(val);
             if (str.includes('1899')) {
-                // Extracts HH:mm from "1899-12-30 11:00:00"
                 const parts = str.split(' ');
                 if (parts.length > 1) return parts[1].substring(0, 5);
             }
@@ -270,9 +269,8 @@
         }
 
         function setDrillDown(type, id, label) { drillDown = { type, id, label }; renderUI(); }
-        function drillBack() { resetNavigation(); }
-        function resetApp() { resetNavigation(); switchTab('Job Board'); }
         function resetNavigation() { drillDown = { type: null, id: null, label: null }; renderUI(); }
+        function drillBack() { resetNavigation(); }
 
         function renderUI() {
             document.getElementById('currentPath').innerText = currentTab;
@@ -296,7 +294,6 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            // CLEAN BLANK ROWS: Filter logic adjusted to ensure Billing loads (using CLIENT_NAME/BILLING_AMOUNT)
             filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT || r.JOINING_DATE);
             renderTable();
         }
@@ -310,7 +307,6 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
-            const firstRow = filteredData[0];
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
             const isSourcedView = (currentTab === 'Sourced');
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
@@ -330,6 +326,7 @@
             } else if (isBilling) {
                 headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Payment Status</th>`;
             } else {
+                const firstRow = filteredData[0];
                 Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
