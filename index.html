@@ -8,20 +8,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; color: #495057; }
-        :root {
-            --odoo-purple: #714B67;
-            --odoo-teal: #00A09D;
-            --odoo-border: #dee2e6;
-        }
+        body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; color: #495057; overflow: hidden; }
+        :root { --odoo-purple: #714B67; --odoo-teal: #00A09D; --odoo-border: #dee2e6; }
         .odoo-header { background-color: var(--odoo-purple); color: white; }
-        .odoo-control-panel { background-color: white; border-bottom: 1px solid var(--odoo-border); }
         .btn-primary { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 6px 12px; font-weight: 500; font-size: 13px; }
-        .btn-secondary { background-color: white; border: 1px solid var(--odoo-border); color: #495057; border-radius: 4px; padding: 6px 12px; font-weight: 500; font-size: 13px; }
         .odoo-table thead { background-color: #f1f3f5; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
-        .odoo-table th { padding: 10px 16px; color: #495057; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .odoo-table td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #f1f3f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
-        .odoo-table tr:hover { background-color: #f8f9fa; cursor: pointer; }
+        .odoo-table th { padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid var(--odoo-border); white-space: nowrap; }
+        .odoo-table td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #f1f3f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid #f8f9fa; }
+        .odoo-table tr:hover { background-color: #f0fdfa; cursor: pointer; }
         .active-tab { border-bottom: 3px solid white; font-weight: 700; opacity: 1 !important; }
         #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 1000; align-items: center; justify-content: center; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--odoo-teal); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
@@ -31,7 +25,6 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
-    <!-- Top Navigation -->
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-5 h-full">
             <div class="flex items-center gap-2">
@@ -39,7 +32,7 @@
                 <span class="font-bold tracking-tight text-white uppercase text-sm">Hiregrow CRM</span>
             </div>
             <nav class="flex gap-4 h-full text-[11px] font-bold uppercase tracking-wider">
-                <button onclick="switchView('Job Board')" id="tab-jobs" class="h-full px-2 opacity-70 hover:opacity-100 transition-all">Recruitment</button>
+                <button onclick="switchView('Job Board')" id="tab-jobs" class="h-full px-2 opacity-70 hover:opacity-100 transition-all">Job Board</button>
                 <button onclick="switchView('Sourced')" id="tab-sourced" class="h-full px-2 opacity-70 hover:opacity-100 transition-all">Sourced</button>
                 <button onclick="switchView('Candidates')" id="tab-candidates" class="h-full px-2 opacity-70 hover:opacity-100 transition-all">Candidates</button>
                 <button onclick="switchView('Interview Tracker')" id="tab-interviews" class="h-full px-2 opacity-70 hover:opacity-100 transition-all">Interviews</button>
@@ -47,100 +40,81 @@
                 <button onclick="switchView('Dashboard and Billing')" id="tab-billing" class="h-full px-2 opacity-70 hover:opacity-100 transition-all">Billing</button>
             </nav>
         </div>
-        <div class="ml-auto flex items-center gap-4">
-            <i class="ph ph-chat-circle text-lg cursor-pointer opacity-80 hover:opacity-100"></i>
-            <i class="ph ph-bell text-lg cursor-pointer opacity-80 hover:opacity-100"></i>
-            <div class="w-7 h-7 rounded bg-teal-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">RK</div>
+        <div class="ml-auto flex items-center gap-3">
+            <button onclick="syncWebsiteForm()" class="text-[10px] font-black bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1.5 shadow-sm hover:bg-emerald-700 transition-all">
+                <i class="ph ph-arrows-clockwise"></i> Sync Website
+            </button>
+            <div class="h-6 w-[1px] bg-white/20"></div>
+            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-2 py-1 rounded hover:bg-white/20 transition-all">Test</button>
         </div>
     </header>
 
-    <!-- Control Panel -->
-    <div class="odoo-control-panel py-2 px-6 flex items-center justify-between shrink-0 gap-4">
+    <div class="bg-white py-2 px-6 flex items-center justify-between border-b shrink-0">
         <div class="flex flex-col">
-            <nav class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                CRM / <span id="breadcrumb" class="text-slate-700">Job Board</span>
-            </nav>
+            <nav class="text-[9px] font-black text-slate-400 uppercase mb-1">CRM / <span id="breadcrumb" class="text-slate-700 font-bold">Job Board</span></nav>
             <div class="flex items-center gap-2">
-                <button onclick="refreshData()" class="btn-primary">CREATE</button>
-                <button class="btn-secondary">IMPORT</button>
-                <div class="h-5 w-[1px] bg-slate-200 mx-1"></div>
-                <button onclick="refreshData()" class="text-slate-400 hover:text-teal-600 p-1"><i class="ph ph-arrows-clockwise text-lg"></i></button>
+                <button onclick="refreshData()" class="btn-primary">NEW</button>
+                <button class="btn-primary bg-slate-100 !text-slate-700 hover:bg-slate-200">IMPORT</button>
             </div>
         </div>
-
-        <div class="flex-1 max-w-md flex items-center bg-slate-100 border border-slate-300 rounded px-3 focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all">
+        <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-teal-500 transition-all">
             <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Search records..." class="w-full bg-transparent py-1.5 text-sm focus:outline-none">
+            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Search records..." class="w-full bg-transparent py-1.5 text-sm outline-none">
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex overflow-hidden">
-        <main class="flex-1 bg-white overflow-auto">
-            <table class="odoo-table w-full text-left table-fixed">
-                <thead id="tableHead"></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-            
-            <div id="noData" class="flex flex-col items-center justify-center py-32 text-slate-300 hidden">
-                <i class="ph ph-folder-open text-6xl opacity-20 mb-4"></i>
-                <p class="font-bold uppercase tracking-widest text-xs">No data found in this view</p>
-                <p class="text-[10px] mt-2 italic">Verify sheet names in Apps Script CONFIG</p>
-            </div>
-        </main>
-    </div>
-
-    <!-- AI Sidebar (Drawer) -->
-    <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 border-l border-slate-200 flex flex-col">
-        <div class="p-5 border-b flex items-center justify-between bg-slate-50">
-            <h3 class="font-black text-teal-700 text-[11px] uppercase tracking-widest flex items-center gap-2">
-                <i class="ph ph-sparkle-fill animate-pulse"></i> Gemini Intelligence
-            </h3>
-            <button onclick="closeAi()" class="hover:bg-slate-200 rounded p-1"><i class="ph ph-x text-xl"></i></button>
-        </div>
-        <div id="aiContent" class="p-6 flex-1 overflow-y-auto text-sm leading-relaxed text-slate-600 italic">
-            Select a record to start analysis...
+    <div class="flex-1 overflow-auto bg-white scrollbar-hide">
+        <table class="odoo-table w-full text-left table-fixed min-w-[1500px]">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
+            <i class="ph ph-folder-open text-6xl opacity-20 mb-4"></i>
+            <p class="font-bold uppercase tracking-widest text-xs">No records found</p>
         </div>
     </div>
 
-    <!-- Global Loader -->
-    <div id="loader">
-        <div class="flex flex-col items-center gap-3">
-            <div class="spinner"></div>
-            <p class="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em]">Syncing Intelligence</p>
+    <div id="aiDrawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 border-l flex flex-col">
+        <div class="p-5 border-b bg-slate-50 flex items-center justify-between">
+            <h3 class="font-bold text-teal-700 text-xs flex items-center gap-2 uppercase tracking-widest"><i class="ph ph-sparkle-fill"></i> Gemini AI</h3>
+            <button onclick="closeAi()"><i class="ph ph-x text-xl"></i></button>
         </div>
+        <div id="aiContent" class="p-6 flex-1 overflow-auto text-sm leading-relaxed text-slate-600 italic">Select a record to start analysis...</div>
     </div>
+
+    <div id="loader"><div class="spinner"></div></div>
 
     <script>
-        /**
-         * 1. PASTE YOUR DEPLOYED URL HERE
-         */
-        const API_URL = "https://script.google.com/a/macros/raveone.in/s/AKfycbwLOzz4Ho4HVzmJGYaGvYB_YHBS4WAPsO2n0o22WvHloZ3KbvCAw4tcbov_SLwH5bUM/exec"; 
+        // REPLACE THIS with your Apps Script Web App URL
+        const API_URL = "https://script.google.com/a/macros/raveone.in/s/AKfycbxnIM5256mMmlyRuCiJjWCCDDs3ZILltkDauPcoM0OKBpPckAWq5QX1HvQPlMwLBBPn/exec"; 
         
         let currentView = 'Job Board';
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
         let filteredData = [];
 
         async function init() {
-            if (API_URL.includes("PASTE_YOUR")) {
-                console.warn("API URL not configured.");
-                return;
-            }
+            if (API_URL.includes("PASTE_YOUR")) return;
+            refreshData();
+        }
 
+        async function refreshData() {
             showLoader(true);
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
+                fullData = await resp.json();
+                switchView(currentView);
+            } catch (err) { console.error("Refresh Error:", err); }
+            showLoader(false);
+        }
+
+        async function syncWebsiteForm() {
+            showLoader(true);
+            try {
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                
-                if (res.error) {
-                    console.error("Backend Error:", res.error);
-                } else {
-                    fullData = res;
-                    switchView(currentView);
-                }
-            } catch (err) {
-                console.error("Connection Error:", err);
-            }
+                alert(res.message || "Sync completed.");
+                refreshData();
+            } catch (err) { alert("Sync Error: " + err.message); }
             showLoader(false);
         }
 
@@ -148,172 +122,115 @@
             currentView = view;
             document.getElementById('breadcrumb').innerText = view;
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab'));
-            
-            const tabMap = { 
-                'Job Board': 'tab-jobs', 
-                'Sourced': 'tab-sourced',
-                'Candidates': 'tab-candidates', 
-                'Interview Tracker': 'tab-interviews', 
-                'Clients': 'tab-clients',
-                'Dashboard and Billing': 'tab-billing' 
-            };
-            if(tabMap[view]) document.getElementById(tabMap[view]).classList.add('active-tab');
+            const map = { 'Job Board': 'tab-jobs', 'Sourced': 'tab-sourced', 'Candidates': 'tab-candidates', 'Interview Tracker': 'tab-interviews', 'Clients': 'tab-clients', 'Dashboard and Billing': 'tab-billing' };
+            if(map[view]) document.getElementById(map[view]).classList.add('active-tab');
 
-            const sourceMap = {
-                'Job Board': fullData.jobs,
-                'Sourced': fullData.sourced,
-                'Candidates': fullData.candidates,
-                'Interview Tracker': fullData.interviews,
-                'Clients': fullData.clients,
-                'Dashboard and Billing': fullData.billing
+            const sourceMap = { 
+                'Job Board': fullData.jobs, 
+                'Sourced': fullData.sourced, 
+                'Candidates': fullData.candidates, 
+                'Interview Tracker': fullData.interviews, 
+                'Clients': fullData.clients, 
+                'Dashboard and Billing': fullData.billing 
             };
-
-            filteredData = Array.isArray(sourceMap[view]) ? sourceMap[view] : [];
+            filteredData = sourceMap[view] || [];
             renderTable();
         }
 
         function renderTable() {
             const head = document.getElementById('tableHead');
             const body = document.getElementById('tableBody');
-            const noData = document.getElementById('noData');
-            
-            head.innerHTML = "";
-            body.innerHTML = "";
+            const empty = document.getElementById('noData');
+            head.innerHTML = ""; body.innerHTML = "";
 
-            if (!filteredData || filteredData.length === 0) {
-                noData.classList.remove('hidden');
-                return;
-            }
-            noData.classList.add('hidden');
+            if (!filteredData.length) { empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
 
-            // Define view-specific column headers
             const columnConfig = {
-                'Job Board': ['JOB_ID', 'POSITION_TITLE', 'LOCATION', 'JOB_STATUS', 'EXPERIENCE_REQUIRED', 'CTC_RANGE'],
-                'Sourced': ['JOB_ID', 'CANDIDATE_SOURCED', 'POSITION_TITLE', 'OUTREACH_DATE', 'STATUS'],
-                'Candidates': ['CANDIDATE_NAME', 'PHONE', 'POSITION_TITLE', 'CURRENT_STATUS', 'TOTAL_EXPERIENCE_YRS', 'SUBMITTED_DATE'],
-                'Interview Tracker': ['CANDIDATE_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'],
-                'Clients': ['CLIENT_ID', 'COMPANY_NAME', 'CONTACT_NAME', 'PHONE', 'WEBSITE', 'CLIENT_STATUS'],
-                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS']
+                'Job Board': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'JOB_STATUS', 'LOCATION', 'EXPERIENCE_REQUIRED', 'CTC_RANGE', 'OPENINGS_COUNT', 'PIPELINE'],
+                'Sourced': ['JOB_ID', 'CLIENT_ID', 'POSITION_TITLE', 'CANDIDATE_SOURCED', 'SOURCED_EMAIL', 'SOURCED_PHONE', 'OUTREACH_DATE', 'STATUS'],
+                'Candidates': ['CANDIDATE_ID', 'CANDIDATE_NAME', 'POSITION_TITLE', 'CURRENT_STATUS', 'TOTAL_EXPERIENCE_YRS', 'SUBMITTED_DATE', 'PHONE', 'EMAIL'],
+                'Interview Tracker': ['INTERVIEW_ID', 'CANDIDATE_NAME', 'COMPANY_NAME', 'POSITION_TITLE', 'INTERVIEW_DATE', 'INTERVIEW_TIME', 'INTERVIEW_MODE', 'NEXT_STEP'],
+                'Clients': ['CLIENT_ID', 'COMPANY_NAME', 'CONTACT_NAME', 'EMAIL', 'PHONE', 'WEBSITE', 'CLIENT_STATUS'],
+                'Dashboard and Billing': ['CLIENT_NAME', 'CANDIDATE_NAME', 'JOINING_DATE', 'BILLING_AMOUNT', 'PAYMENT_STATUS', 'BALANCE_DUE']
             };
 
-            const displayCols = columnConfig[currentView] || Object.keys(filteredData[0]).filter(k => k !== '_ROW').slice(0, 6);
-            
-            let hRow = "<tr><th class='w-10 px-4'><input type='checkbox'></th>";
-            displayCols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
+            const cols = columnConfig[currentView] || Object.keys(filteredData[0]).filter(k => k !== '_ROW').slice(0, 8);
+            let hRow = "<tr><th class='w-12 px-4'><input type='checkbox'></th>";
+            cols.forEach(c => hRow += `<th>${c.replace(/_/g, ' ')}</th>`);
             hRow += "<th class='text-right px-6'>AI</th></tr>";
             head.innerHTML = hRow;
 
-            filteredData.forEach((row, idx) => {
-                let bRow = `<tr class="border-b border-slate-50 transition-colors">`;
+            filteredData.forEach((row, i) => {
+                let bRow = `<tr class="border-b transition-colors hover:bg-slate-50">`;
                 bRow += `<td class='px-4'><input type='checkbox'></td>`;
-                displayCols.forEach(c => {
-                    bRow += `<td>${formatCell(c, row[c])}</td>`;
-                });
-                bRow += `<td class="text-right px-6">
-                            <button onclick="runAi(${idx}, event)" class="text-teal-600 hover:scale-125 transition-transform p-1">
-                                <i class="ph ph-sparkle-fill text-lg"></i>
-                            </button>
-                         </td>`;
-                bRow += "</tr>";
+                cols.forEach(c => bRow += `<td>${formatVal(c, row[c])}</td>`);
+                bRow += `<td class="text-right px-6"><button onclick="runAi(${i}, event)" class="text-teal-600 hover:scale-125 transition-all p-1"><i class="ph ph-sparkle-fill text-lg"></i></button></td></tr>`;
                 body.innerHTML += bRow;
             });
         }
 
-        function formatCell(key, val) {
-            if (val === null || val === undefined || val === "") return "<span class='text-slate-300'>--</span>";
-            const s = String(val);
-            if (key.includes('STATUS')) {
-                const low = s.toLowerCase();
-                let col = "bg-slate-100 text-slate-500";
-                if (['open', 'active', 'hired', 'submitted', 'shortlisted', 'hot'].includes(low)) col = "bg-teal-50 text-teal-700 border border-teal-100";
-                if (['rejected', 'cold', 'pending'].includes(low)) col = "bg-rose-50 text-rose-700 border border-rose-100";
-                if (['sourced', 'interested', 'warm'].includes(low)) col = "bg-amber-50 text-amber-700 border border-amber-100";
-                return `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${col}">${val}</span>`;
+        function formatVal(k, v) {
+            if (!v && v !== 0) return "--";
+            const s = String(v).toLowerCase();
+            if (k.includes('STATUS') || k.includes('PRIORITY')) {
+                let cls = "bg-slate-100 text-slate-500";
+                if (['open', 'active', 'hired', 'hot', 'submitted', 'shortlisted'].includes(s)) cls = "bg-teal-50 text-teal-700 border-teal-100";
+                if (['rejected', 'cold', 'dropped', 'off'].includes(s)) cls = "bg-rose-50 text-rose-700 border-rose-100";
+                if (['warm', 'sourced', 'interested'].includes(s)) cls = "bg-amber-50 text-amber-700 border-amber-100";
+                return `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase border ${cls}">${v}</span>`;
             }
-            if (key.includes('CTC') || key.includes('AMOUNT')) return `<span class="font-bold text-slate-700">₹${val}</span>`;
-            return s;
+            if (k.includes('AMOUNT') || k.includes('CTC')) {
+                const num = Number(String(v).replace(/[^0-9.-]+/g,""));
+                return isNaN(num) ? v : `₹${num.toLocaleString()}`;
+            }
+            return v;
+        }
+
+        async function runAi(idx, e) {
+            e.stopPropagation();
+            const record = filteredData[idx];
+            let job = currentView === 'Job Board' ? record : (fullData.jobs.find(j => j.JOB_ID === record.JOB_ID) || fullData.jobs[0] || {});
+            
+            document.getElementById('aiDrawer').classList.remove('translate-x-full');
+            document.getElementById('aiContent').innerHTML = `<div class="py-20 text-center"><div class="spinner mx-auto mb-4"></div><p class="text-[10px] uppercase font-bold text-slate-400">Analyzing Fitment...</p></div>`;
+
+            try {
+                const resp = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'aiRank', candidateData: record, jobData: job }) 
+                });
+                const res = await resp.json();
+                document.getElementById('aiContent').innerHTML = `
+                    <div class="mb-4 text-[10px] font-black text-teal-600 uppercase tracking-widest">Analysis for ${job.POSITION_TITLE || "Role"}</div>
+                    <div class="text-slate-700 font-medium bg-white p-4 rounded border shadow-sm leading-relaxed">${res.analysis || "No analysis returned."}</div>
+                `;
+            } catch (err) {
+                document.getElementById('aiContent').innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded text-xs">AI Analysis Error.</div>`;
+            }
         }
 
         function handleSearch() {
             const q = document.getElementById('searchInput').value.toLowerCase();
-            const sourceMap = {
-                'Job Board': fullData.jobs,
-                'Sourced': fullData.sourced,
-                'Candidates': fullData.candidates,
-                'Interview Tracker': fullData.interviews,
-                'Clients': fullData.clients,
-                'Dashboard and Billing': fullData.billing
-            };
+            const sourceMap = { 'Job Board': fullData.jobs, 'Sourced': fullData.sourced, 'Candidates': fullData.candidates, 'Interview Tracker': fullData.interviews, 'Clients': fullData.clients, 'Dashboard and Billing': fullData.billing };
             const base = sourceMap[currentView] || [];
             filteredData = base.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
             renderTable();
         }
 
-        async function runAi(idx, event) {
-            event.stopPropagation();
-            const record = filteredData[idx];
-            
-            // For Candidates/Sourced, find the matching Job. For Job Board, use itself.
-            let job = null;
-            let candidate = record;
-
-            if (currentView === 'Job Board') {
-                job = record;
-                candidate = fullData.candidates[0] || {}; // Fallback for demo
-            } else {
-                const candJobId = record.JOB_ID || "";
-                job = fullData.jobs.find(j => j.JOB_ID === candJobId) || fullData.jobs[0] || {};
-            }
-
-            document.getElementById('aiDrawer').classList.remove('translate-x-full');
-            document.getElementById('aiContent').innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 gap-4">
-                    <div class="spinner"></div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Evaluating Fit...</p>
-                </div>`;
-
-            try {
-                const resp = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'aiRank',
-                        candidateData: candidate,
-                        jobData: job
-                    })
-                });
-                const result = await resp.json();
-                
-                if (result.success) {
-                    document.getElementById('aiContent').innerHTML = `
-                        <div class="mb-6">
-                            <h4 class="text-[10px] font-black text-slate-400 uppercase mb-2">Analysis Target</h4>
-                            <div class="p-3 bg-teal-50 border border-teal-100 rounded text-teal-800 font-bold text-xs">
-                                ${job.POSITION_TITLE || "General Role"}
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
-                            <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">AI Verdict</h4>
-                            <div class="whitespace-pre-wrap text-slate-700 font-medium leading-relaxed">
-                                ${result.analysis}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    throw new Error(result.error || "Analysis failed");
-                }
-            } catch (err) {
-                document.getElementById('aiContent').innerHTML = `
-                    <div class="p-4 bg-rose-50 border border-rose-100 rounded text-rose-600 text-xs font-bold">
-                        <i class="ph ph-warning-circle mr-2"></i> ERROR: ${err.message}
-                    </div>
-                `;
-            }
-        }
-
         function closeAi() { document.getElementById('aiDrawer').classList.add('translate-x-full'); }
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
-        function refreshData() { init(); }
-
+        
+        async function testConnection() {
+            showLoader(true);
+            try {
+                const resp = await fetch(`${API_URL}?action=getAllData`);
+                const res = await resp.json();
+                alert(res.error ? `Error: ${res.error}` : "✅ CRM Connected Successfully!");
+            } catch (e) { alert("❌ Connection failed."); }
+            showLoader(false);
+        }
+        
         window.onload = init;
     </script>
 </body>
