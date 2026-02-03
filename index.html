@@ -90,7 +90,7 @@
     <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col text-left">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <span class="breadcrumb-item" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
+                <span class="breadcrumb-item" onclick="resetNavigation()">CRM</span> / <span id="currentPath">Job Board</span>
             </div>
             <div class="flex items-center gap-2 mt-1">
                 <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase tracking-tighter text-[10px]">Live Refresh</button>
@@ -175,7 +175,7 @@
             </div>
             <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
                 <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-[#714B67] uppercase tracking-widest flex items-center gap-2 transition-all">
-                    <i class="ph ph-copy text-lg"></i> Copy Message
+                    <i class="ph ph-copy text-lg"></i> Copy Text
                 </button>
                 <div class="flex gap-2">
                     <button id="waActionBtn" class="bg-emerald-600 text-white px-5 py-2 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-700 shadow-md transition-all">
@@ -206,10 +206,16 @@
             switchTab(currentTab);
         };
 
-        function updateURL() {
-            const params = new URLSearchParams();
-            params.set('tab', currentTab);
-            window.history.pushState({}, '', '?' + params.toString());
+        // Utility: Fixes "1899" epoch time from Google Sheets to HH:mm
+        function formatSheetTime(val) {
+            if (!val) return '--';
+            const str = String(val);
+            if (str.includes('1899')) {
+                // Extracts HH:mm from "1899-12-30 11:00:00"
+                const parts = str.split(' ');
+                if (parts.length > 1) return parts[1].substring(0, 5);
+            }
+            return str;
         }
 
         async function refreshData() {
@@ -227,11 +233,29 @@
             try {
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
                 const res = await resp.json();
-                alert(res.message || "Sync triggered.");
+                alert(res.message);
                 switchTab('Candidates');
                 refreshData();
             } catch (err) { alert("Sync failed."); }
             showLoader(false);
+        }
+
+        async function updateStatus(row, colName, value) {
+            const sheetMap = { 
+                'Candidates': 'Candidates', 
+                'Sourced': 'Sourced', 
+                'Interview Tracker': 'Interview Tracker' 
+            };
+            const sheetName = sheetMap[currentTab] || (drillDown.type === 'job-candidates' ? 'Candidates' : '');
+            if (!sheetName) return;
+
+            try {
+                await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'updateStatus', sheet: sheetName, row: row._ROW, col: colName, value: value }) 
+                });
+                refreshData();
+            } catch (e) { alert("Update failed."); }
         }
 
         function switchTab(tab) {
@@ -242,7 +266,6 @@
                 btn.classList.remove('active-tab');
                 if (btn.innerText === tab) btn.classList.add('active-tab');
             });
-            updateURL();
             renderUI();
         }
 
@@ -273,8 +296,8 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            // Filter blank rows based on key tab-specific identifiers
-            filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID);
+            // CLEAN BLANK ROWS: Filter logic adjusted to ensure Billing loads (using CLIENT_NAME/BILLING_AMOUNT)
+            filteredData = dataset.filter(r => r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT || r.JOINING_DATE);
             renderTable();
         }
 
@@ -287,6 +310,7 @@
             if (!filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
+            const firstRow = filteredData[0];
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
             const isSourcedView = (currentTab === 'Sourced');
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
@@ -298,15 +322,14 @@
             if (isCandidatesView) {
                 headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-48'>Status</th><th class='w-24 text-center'>Docs</th>`;
             } else if (isSourcedView) {
-                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Current Status</th><th class='w-32'>Sourced On</th>`;
+                headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate Details</th><th class='w-56'>Role Title</th><th class='w-40'>Status</th><th class='w-32'>Sourced On</th>`;
             } else if (isJobBoard) {
                 headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
             } else if (isInterviews) {
-                headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-40'>Next Step</th>`;
+                headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-48'>Next Step</th>`;
             } else if (isBilling) {
-                headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Commercials</th><th class='w-40'>Payment Status</th>`;
+                headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Payment Status</th>`;
             } else {
-                const firstRow = filteredData[0];
                 Object.keys(firstRow).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             }
             
@@ -322,9 +345,9 @@
                 bRow += `<td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
 
                 if (isCandidatesView) {
-                    bRow += renderGroupedRow(row, 'Candidates');
+                    bRow += renderCandidatesRow(row);
                 } else if (isSourcedView) {
-                    bRow += renderGroupedRow(row, 'Sourced');
+                    bRow += renderSourcedRow(row);
                 } else if (isJobBoard) {
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.JOB_ID}</td>`;
                     bRow += `<td><div class='data-stack-title'>${row.POSITION_TITLE || row.TITLE || '--'}</div><div class='data-stack-sub'>${row.LOCATION || '--'}</div></td>`;
@@ -333,11 +356,15 @@
                     bRow += `<td>${renderValue('JOB_STATUS', row.JOB_STATUS || row.STATUS)}</td>`;
                     bRow += `<td class='text-slate-400 font-bold'>${row.POSTED_DATE || '--'}</td>`;
                 } else if (isInterviews) {
+                    const nextStep = row.NEXT_STEP || 'Pending';
+                    const interviewOpts = ['Pending', '1st Round', '2nd Round', '3rd Round', 'Final Round', 'Selected', 'Rejected'];
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td>`;
                     bRow += `<td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td>`;
                     bRow += `<td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td>`;
-                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${row.INTERVIEW_TIME || '--'}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td>`;
-                    bRow += `<td><div class='data-stack-sub font-bold'>${row.NEXT_STEP || '--'}</div></td>`;
+                    bRow += `<td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${formatSheetTime(row.INTERVIEW_TIME)}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td>`;
+                    bRow += `<td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'NEXT_STEP', this.value)">
+                                ${interviewOpts.map(o => `<option value="${o}" ${nextStep === o ? 'selected' : ''}>${o}</option>`).join('')}
+                             </select></td>`;
                 } else if (isBilling) {
                     bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || '--'}</div></td>`;
                     bRow += `<td class='font-bold text-slate-700'>${row.JOINING_DATE || '--'}</td>`;
@@ -354,37 +381,31 @@
             });
         }
 
-        function renderGroupedRow(row, type) {
-            const jobId = row.JOB_ID || '--';
-            const name = row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || '--';
-            const email = row.EMAIL || row.SOURCED_EMAIL || '--';
-            const phone = row.PHONE || row.SOURCED_PHONE || '--';
-            const totalExp = row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || '--';
-            const relExp = row.RELEVANT_EXPERIENCE || row.RELEVANT_EXPERIENCE_YRS || '--';
-            const expCtc = row.EXPECTED_CTC || '--';
-            const curCtc = row.CURRENT_CTC || row.LAST_DRAWN_CTC || '--';
+        function renderCandidatesRow(row) {
+            const status = row.CURRENT_STATUS || 'Submitted';
+            const opts = ['Submitted', 'Shortlisted', 'Interview Scheduled', 'Offered', 'Joined'];
+            let html = `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.JOB_ID || '--'}</td>`;
+            html += `<td><div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_NAME}</div><div class="text-[10px] text-slate-400">${row.EMAIL}</div><div class="text-[10px] text-[#714B67] font-bold">${row.PHONE}</div></td>`;
+            html += `<td><div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div><div class="text-[9px] text-slate-400 uppercase font-bold">${row.JOB_ID || '--'}</div></td>`;
+            html += `<td><div class="text-slate-600 font-medium">Total: ${row.TOTAL_EXPERIENCE || '--'}</div><div class="text-[10px] text-slate-400 italic">Rel: ${row.RELEVANT_EXPERIENCE || '--'}</div></td>`;
+            html += `<td><div class="text-emerald-700 font-bold">Exp: ${row.EXPECTED_CTC || '--'}</div><div class="text-[9px] text-slate-400">Curr: ${row.CURRENT_CTC || '--'}</div></td>`;
+            html += `<td><select class="status-dropdown w-full" onchange="updateStatus(${JSON.stringify(row)}, 'CURRENT_STATUS', this.value)">
+                        ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
+                     </select></td>`;
+            html += `<td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">CV</a>` : '--'}</td>`;
+            return html;
+        }
 
-            let html = `<td class="font-mono text-[10px] text-slate-400 uppercase">${jobId}</td>`;
-            html += `<td><div class="font-bold text-slate-900 leading-tight">${name}</div><div class="text-[10px] text-slate-400">${email}</div><div class="text-[10px] text-[#714B67] font-bold">${phone}</div></td>`;
-            html += `<td><div class="font-semibold text-slate-700 leading-tight">${row.JOB_TITLE || row.POSITION_TITLE || '--'}</div><div class="text-[9px] text-slate-400 uppercase font-bold">${jobId}</div></td>`;
-            
-            if (type === 'Candidates') {
-                const status = row.CURRENT_STATUS || 'Submitted';
-                const opts = ['Submitted', 'Shortlisted', 'Interview Scheduled', 'Offered', 'Joined'];
-                html += `<td><div class="text-slate-600 font-medium">Total: ${totalExp}</div><div class="text-[10px] text-slate-400 italic">Rel: ${relExp}</div></td>`;
-                html += `<td><div class="text-emerald-700 font-bold">Exp: ${expCtc}</div><div class="text-[9px] text-slate-400">Curr: ${curCtc}</div></td>`;
-                html += `<td><select class="status-dropdown" onchange="event.stopPropagation()">
-                            ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
-                         </select></td>`;
-                html += `<td class='text-center'>${row.RESUME_LINK ? `<a href="${row.RESUME_LINK}" target="_blank" class="bg-teal-50 text-teal-600 px-2 py-0.5 rounded font-black text-[9px] hover:bg-teal-600 hover:text-white transition uppercase inline-block border border-teal-100">CV</a>` : '--'}</td>`;
-            } else {
-                const status = row.STATUS || 'New';
-                const opts = ['New', 'Contacted', 'Applied', 'Not interested', 'No reply'];
-                html += `<td><select class="status-dropdown" onchange="event.stopPropagation()">
-                            ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
-                         </select></td>`;
-                html += `<td class="text-slate-400 font-bold text-[10px]">${row.OUTREACH_DATE || row.APPLIED_DATE || '--'}</td>`;
-            }
+        function renderSourcedRow(row) {
+            const status = row.STATUS || 'New';
+            const opts = ['New', 'Contacted', 'Applied', 'Not interested', 'No reply'];
+            let html = `<td class="font-mono text-[10px] text-slate-400 uppercase">${row.JOB_ID || '--'}</td>`;
+            html += `<td><div class="font-bold text-slate-900 leading-tight">${row.CANDIDATE_SOURCED || row.CANDIDATE_NAME}</div><div class="text-[10px] text-slate-400">${row.SOURCED_EMAIL || row.EMAIL}</div><div class="text-[10px] text-[#714B67] font-bold">${row.SOURCED_PHONE || row.PHONE}</div></td>`;
+            html += `<td><div class="font-semibold text-slate-700 leading-tight">${row.POSITION_TITLE || row.JOB_TITLE || '--'}</div></td>`;
+            html += `<td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'STATUS', this.value)">
+                        ${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}
+                     </select></td>`;
+            html += `<td class="text-slate-400 font-bold text-[10px]">${row.OUTREACH_DATE || row.APPLIED_DATE || '--'}</td>`;
             return html;
         }
 
@@ -426,7 +447,10 @@
                 const rowData = { 
                     ...row, 
                     POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || '--',
-                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || '--'
+                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || '--',
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || 'N/A',
+                    LAST_CTC: row.CURRENT_CTC || row.LAST_DRAWN_CTC || row.LAST_CTC || 'N/A',
+                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION || 'N/A'
                 };
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
@@ -469,7 +493,7 @@
                 INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value
             };
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides }) });
+                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: filteredData[activeRowIdx], overrides: overrides }) });
                 const res = await resp.json();
                 closeModal('interviewModal');
                 document.getElementById('messageBody').value = res.message;
@@ -506,7 +530,7 @@
             try {
                 const resp = await fetch(`${API_URL}?action=getAllData`);
                 const res = await resp.json();
-                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Sync complete.");
+                alert(res.error ? `Error: ${res.error}` : "✅ Connected! Database state synced.");
             } catch (e) { alert("❌ Connection failed."); }
             showLoader(false);
         }
