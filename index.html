@@ -362,24 +362,38 @@
                     EXPERIENCE_REQUIRED: row.EXPERIENCE_REQUIRED || row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || row.MIN_EXPERIENCE || '2-3 years',
                     CTC_RANGE: row.CTC_RANGE || row.EXPECTED_CTC || row.MIN_SALARY || 'As per industry standards',
                     JOB_ID: row.JOB_ID || 'N/A',
-                    // REMOVED THE FORMS.GLE LINK
+                    
+                    // NEW: Mappings for Candidate Submission Template to prevent blank placeholders
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXP || row.EXPERIENCE || 'N/A',
+                    RELEVANT_EXPERIENCE: row.RELEVANT_EXPERIENCE || row.RELEVANT_EXP || 'N/A',
+                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION || row.CITY || 'N/A',
+                    CURRENT_CTC: row.CURRENT_CTC || row.CTC || row.LAST_CTC || 'N/A',
+                    EXPECTED_CTC: row.EXPECTED_CTC || row.ECTC || 'N/A',
+                    NOTICE_PERIOD: row.NOTICE_PERIOD || row.NOTICE || 'N/A',
+
                     JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${row.JOB_ID || ''}`,
-                    APP_LINK: `Refer to JD link for application form.`
+                    // NEW: Fixed Application Link Text
+                    APP_LINK: `Apply using JD Link in www.raveone.in`
                 };
 
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 
+                // CLIENT-SIDE CLEANUP (Fallback if backend regex misses or isn't deployed)
+                let cleanMessage = res.message || "";
+                cleanMessage = cleanMessage.replace(/https:\/\/forms\.gle\/TEn6Ws23TtsdKeyN7/g, "Apply using JD Link in www.raveone.in");
+                cleanMessage = cleanMessage.replace(/📝 Apply here:\s*Apply using/gi, "Apply using"); // Clean up label if it exists
+
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME;
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject || "CRM Portal Update";
-                document.getElementById('messageBody').value = res.message;
+                document.getElementById('messageBody').value = cleanMessage;
                 
                 const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
-                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
-                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject || "Update")}&body=${encodeURIComponent(res.message)}`, '_blank');
+                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(cleanMessage)}`, '_blank');
+                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject || "Update")}&body=${encodeURIComponent(cleanMessage)}`, '_blank');
                 
                 openModal('messageModal');
             } catch (err) { alert("Data fetch failed."); }
