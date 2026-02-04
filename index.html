@@ -114,13 +114,15 @@
 
     <!-- Communication Modal -->
     <div id="messageModal" class="modal-overlay">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all border border-slate-200">
+        <!-- Added max-h-[90vh] to keep modal within viewport height -->
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
                 <div class="text-left"><h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
                 <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Personalized Message</p></div>
                 <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="p-6 space-y-4 text-left">
+            <!-- Added overflow-y-auto and flex-1 to allow body content scrolling -->
+            <div class="p-6 space-y-4 text-left overflow-y-auto flex-1">
                 <div id="emailSubjectContainer"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
                 <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div></div>
                 <div><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Body</label>
@@ -138,12 +140,14 @@
 
     <!-- Interview Modal -->
     <div id="interviewModal" class="modal-overlay">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200">
+        <!-- Added max-h-[90vh] -->
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
                 <h3 class="font-bold text-indigo-800 text-xs uppercase tracking-widest text-left">Schedule Interview</h3>
                 <button onclick="closeModal('interviewModal')" class="p-1 hover:bg-white rounded-full"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="p-6 space-y-4 text-left">
+            <!-- Added overflow-y-auto and flex-1 -->
+            <div class="p-6 space-y-4 text-left overflow-y-auto flex-1">
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Date</label>
                     <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
@@ -368,6 +372,7 @@
                     RELEVANT_EXPERIENCE: row.RELEVANT_EXPERIENCE || row.RELEVANT_EXP || 'N/A',
                     CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION || row.CITY || 'N/A',
                     CURRENT_CTC: row.CURRENT_CTC || row.CTC || row.LAST_CTC || 'N/A',
+                    LAST_CTC: row.CURRENT_CTC || row.CTC || row.LAST_CTC || 'N/A', // Explicit mapping for LAST_CTC placeholder
                     EXPECTED_CTC: row.EXPECTED_CTC || row.ECTC || 'N/A',
                     NOTICE_PERIOD: row.NOTICE_PERIOD || row.NOTICE || 'N/A',
 
@@ -431,46 +436,57 @@
             }
         }
 
-        async function submitInterviewInvite() {
-            showLoader(true);
-            const overrides = { 
-                INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), 
-                INTERVIEW_TIME: document.getElementById('intTime').value, 
-                INTERVIEW_MODE: document.getElementById('intFormat').value, 
-                INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value 
-            };
-            try {
-                const row = filteredData[activeRowIdx];
-                const rowData = { 
-                    ...row, 
-                    CANDIDATE_NAME: row.CANDIDATE_NAME || 'Candidate', 
-                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || 'the Position',
-                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || 'Client'
-                };
-                // Calls the backend with WA template first (but backend logic now handles both based on key)
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: rowData, overrides: overrides }) });
-                const res = await resp.json();
-                
-                closeModal('interviewModal');
-                
-                // Update Email Subject/Body in modal
-                document.getElementById('modalTitle').innerText = "INTERVIEW INVITE";
-                document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME;
-                document.getElementById('emailSubject').innerText = res.subject;
-                document.getElementById('messageBody').value = res.message;
+        function submitInterviewInvite() {
+            // No loading needed for local generation
+            const dateInput = document.getElementById('intDate').value;
+            if(!dateInput) { alert("Please select a date"); return; }
+            
+            const date = new Date(dateInput).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            const time = document.getElementById('intTime').value;
+            const mode = document.getElementById('intFormat').value;
+            const location = document.getElementById('intLocation').value;
+            const row = filteredData[activeRowIdx];
+            
+            const candidateName = (row.CANDIDATE_NAME || "Candidate").split(' ')[0];
+            const fullName = row.CANDIDATE_NAME || "Candidate";
+            const role = row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || "the position";
+            const company = row.COMPANY_NAME || row.CLIENT_ID || row.CLIENT_NAME || "the company";
+            
+            let subject = "";
+            let message = "";
+            const signature = "\n\nSignature \nDr. Rajesh K Rao\nRaveone Consultants\nrajesh@raveone.in  II 9148330565 II";
 
-                // Setup buttons
-                const rawPh = (res.phone || row.PHONE || "").toString().replace(/\D/g, '');
-                const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
-                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
-                
-                // For email, we might want to fetch the email specific template version if needed, 
-                // but the current backend generates email-friendly subject line in the same response.
-                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+            if (mode === "F2F") {
+                subject = `Interview Invitation: ${role} at ${company}`;
+                message = `Hi ${candidateName},\n\nThank you for your interest in ${company}. We were impressed by your application and would like to invite you to our office for an in-person interview.\n\nYou will be meeting with [Interviewer Name/Title] to discuss your background and the role in more detail.\n\nWhen: ${date} at ${time}\nWhere: ${location}\n\nWhen you arrive, please ask for [Name of Receptionist or Host] at the front desk.\n\nPlease let me know if this time works for you, or feel free to suggest a few alternatives.\n\nBest regards,\n[Your Name]`;
+            } else if (mode === "Telephonic") {
+                subject = `Phone Interview with ${company}`;
+                message = `Hi ${candidateName},\n\nI hope you are having a good week.\n\nI reviewed your application for the ${role} position and would love to set up a short phone call to discuss your experience and share more about our team.\n\nAre you available for a 15-20 minute chat on ${date} at ${time}?\n\nIf that works, please let me know the best number to reach you at. If not, please suggest a few times that fit your schedule.\n\nBest,\n[Your Name]`;
+            } else { // Google Meet
+                subject = `Video Interview: ${role} / ${fullName}`;
+                message = `Hi ${candidateName},\n\nWe are excited to move forward with your application for the ${role} position. We would like to schedule a video interview via Google Meet.\n\nDate: ${date}\nTime: ${time}\nLink: ${location}\n\nYou will be speaking with [Interviewer Name]. Please make sure you are in a quiet place with a stable internet connection.\n\nPlease reply to confirm if this time works for you.\n\nLooking forward to seeing you then!\n\nRegards,\n[Your Name]`;
+            }
 
-                openModal('messageModal');
-            } catch (err) { alert("Invite error."); }
-            showLoader(false);
+            // Replace [Your Name] and append signature
+            message = message.replace("[Your Name]", ""); 
+            message += signature;
+
+            closeModal('interviewModal');
+            
+            document.getElementById('modalTitle').innerText = "INTERVIEW INVITE";
+            document.getElementById('modalSubtitle').innerText = fullName;
+            document.getElementById('emailSubject').innerText = subject;
+            document.getElementById('messageBody').value = message;
+            
+            // Update WA button to include subject as bold header
+            const waMsg = `*${subject}*\n\n${message}`;
+            const rawPh = (row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
+            const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
+            
+            document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+            document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`, '_blank');
+
+            openModal('messageModal');
         }
 
         function handleFilter() { const q = document.getElementById('globalSearch').value.toLowerCase(); renderUI(); if (q) filteredData = filteredData.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q))); renderTable(); }
