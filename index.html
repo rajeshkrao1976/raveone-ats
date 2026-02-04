@@ -152,7 +152,7 @@
                 </div>
                 <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Format</label>
                 <select id="intFormat" onchange="updateIntLocLabel()" class="status-dropdown"><option>Google Meet</option><option>Telephonic</option><option>F2F</option></select></div>
-                <div><label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Link / Address</label>
+                <div><label id="intLocLabel" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Link / Address / Phone</label>
                 <input type="text" id="intLocation" value="https://meet.google.com/vcj-dfaf-pcc" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex justify-end gap-3">
@@ -163,7 +163,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyPcskubRZyingteGUZZdUELLCVAHLUfvz9WFbukEO4VdrVHhC-D7qjG0Q-i29Miyc/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzqzOBMSEf8XoZX0QZlQy6PbFIcGS2QxxKuDp2OFCXvXrYluIOHGsPtD6-Ucu5hGbBh/exec"; 
         let currentTab = 'Job Board';
         let drillDown = { type: null, id: null, label: null };
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
@@ -256,8 +256,12 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            // Fixed filter to ensure Billing data always loads
-            filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID || r.BILLING_AMOUNT || r.JOINING_DATE);
+            // Fixed filter logic to ensure Billing data shows up
+            if (currentTab === 'Dashboard and Billing') {
+                filteredData = dataset; // Do not apply the generic filter for billing, show all rows
+            } else {
+                filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID);
+            }
             renderTable();
         }
 
@@ -266,7 +270,7 @@
             const body = document.getElementById('tableBody');
             const empty = document.getElementById('noData');
             head.innerHTML = ""; body.innerHTML = "";
-            if (!filteredData.length) { empty.classList.remove('hidden'); return; }
+            if (!filteredData || !filteredData.length) { empty.classList.remove('hidden'); return; }
             empty.classList.add('hidden');
 
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
@@ -302,8 +306,9 @@
                     const status = row.NEXT_STEP || 'Pending';
                     const opts = ['Pending', '1st Round', '2nd Round', 'Final Round', 'Selected', 'Rejected'];
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td><td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td><td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td><td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${formatSheetTime(row.INTERVIEW_TIME)}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td><td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'NEXT_STEP', this.value)">${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`;
-                } else if (isBilling) bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || '--'}</div></td><td class='font-bold text-slate-700'>${row.JOINING_DATE || '--'}</td><td><div class='data-stack-emerald'>₹${Number(row.BILLING_AMOUNT || 0).toLocaleString()}</div><div class='data-stack-sub'>Comm: ${row.PERCENTAGE_COMMISSION || '--'}%</div></td><td>${renderValue('PAYMENT_STATUS', row.PAYMENT_STATUS)}</td>`;
-                else Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
+                } else if (isBilling) {
+                    bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || row.CLIENT || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || row.CANDIDATE || '--'}</div></td><td class='font-bold text-slate-700'>${row.JOINING_DATE || row.JOINED_DATE || '--'}</td><td><div class='data-stack-emerald'>₹${Number(row.BILLING_AMOUNT || row.AMOUNT || 0).toLocaleString()}</div><div class='data-stack-sub'>Comm: ${row.PERCENTAGE_COMMISSION || row.COMMISSION || '--'}%</div></td><td>${renderValue('PAYMENT_STATUS', row.PAYMENT_STATUS || row.STATUS)}</td>`;
+                } else Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 
                 bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)] z-10" onclick="event.stopPropagation()"><div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div></td></tr>`;
                 body.innerHTML += bRow;
@@ -357,6 +362,7 @@
                     EXPERIENCE_REQUIRED: row.EXPERIENCE_REQUIRED || row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || row.MIN_EXPERIENCE || '2-3 years',
                     CTC_RANGE: row.CTC_RANGE || row.EXPECTED_CTC || row.MIN_SALARY || 'As per industry standards',
                     JOB_ID: row.JOB_ID || 'N/A',
+                    // REMOVED THE FORMS.GLE LINK
                     JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${row.JOB_ID || ''}`,
                     APP_LINK: `Refer to JD link for application form.`
                 };
@@ -380,26 +386,74 @@
             showLoader(false);
         }
 
-        function openIntModal(idx) { activeRowIdx = idx; document.getElementById('intDate').valueAsDate = new Date(); updateIntLocLabel(); openModal('interviewModal'); }
+        function openIntModal(idx) { 
+            activeRowIdx = idx; 
+            document.getElementById('intDate').valueAsDate = new Date(); 
+            updateIntLocLabel(); 
+            openModal('interviewModal'); 
+        }
+
         function updateIntLocLabel() {
             const fmt = document.getElementById('intFormat').value;
             const lbl = document.getElementById('intLocLabel');
             const inp = document.getElementById('intLocation');
-            if (fmt === 'Google Meet') { lbl.innerText = "Meeting Link"; inp.value = "https://meet.google.com/vcj-dfaf-pcc"; }
-            else if (fmt === 'Telephonic') { lbl.innerText = "Phone Number"; inp.value = filteredData[activeRowIdx]?.PHONE || ""; }
-            else { lbl.innerText = "Office Address"; inp.value = "Hiregrow Office, Kalyan Nagar, Bangalore"; }
+            const row = filteredData[activeRowIdx];
+            
+            // Auto-fetch logic for Client Address or Phone
+            if (fmt === 'Google Meet') { 
+                lbl.innerText = "Meeting Link"; 
+                inp.value = "https://meet.google.com/vcj-dfaf-pcc"; 
+            }
+            else if (fmt === 'Telephonic') { 
+                lbl.innerText = "Interviewer / Phone Number"; 
+                // Try to find client phone number from client ID
+                const client = fullData.clients.find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
+                inp.value = client ? (client.PHONE || client.CONTACT_PERSON_PHONE || row.PHONE) : ""; 
+            }
+            else { 
+                lbl.innerText = "Venue Address"; 
+                const client = fullData.clients.find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
+                inp.value = client ? (client.ADDRESS || client.LOCATION || "Client Office") : "Bangalore Office"; 
+            }
         }
 
         async function submitInterviewInvite() {
             showLoader(true);
-            const overrides = { INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), INTERVIEW_TIME: document.getElementById('intTime').value, INTERVIEW_MODE: document.getElementById('intFormat').value, INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value };
+            const overrides = { 
+                INTERVIEW_DATE: new Date(document.getElementById('intDate').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), 
+                INTERVIEW_TIME: document.getElementById('intTime').value, 
+                INTERVIEW_MODE: document.getElementById('intFormat').value, 
+                INTERVIEW_LOCATION_OR_LINK: document.getElementById('intLocation').value 
+            };
             try {
                 const row = filteredData[activeRowIdx];
-                const rowData = { ...row, CANDIDATE_NAME: row.CANDIDATE_NAME || 'Candidate', POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || 'the Position' };
+                const rowData = { 
+                    ...row, 
+                    CANDIDATE_NAME: row.CANDIDATE_NAME || 'Candidate', 
+                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || 'the Position',
+                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || 'Client'
+                };
+                // Calls the backend with WA template first (but backend logic now handles both based on key)
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: 'INTERVIEW_INVITATION_WA', rowData: rowData, overrides: overrides }) });
                 const res = await resp.json();
+                
                 closeModal('interviewModal');
+                
+                // Update Email Subject/Body in modal
+                document.getElementById('modalTitle').innerText = "INTERVIEW INVITE";
+                document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME;
+                document.getElementById('emailSubject').innerText = res.subject;
                 document.getElementById('messageBody').value = res.message;
+
+                // Setup buttons
+                const rawPh = (res.phone || row.PHONE || "").toString().replace(/\D/g, '');
+                const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
+                document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(res.message)}`, '_blank');
+                
+                // For email, we might want to fetch the email specific template version if needed, 
+                // but the current backend generates email-friendly subject line in the same response.
+                document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject)}&body=${encodeURIComponent(res.message)}`, '_blank');
+
                 openModal('messageModal');
             } catch (err) { alert("Invite error."); }
             showLoader(false);
