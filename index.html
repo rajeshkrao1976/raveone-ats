@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiregrow CRM | Raveone Consultants</title>
+    <title>Hiregrow CRM | Odoo Enterprise Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -15,6 +15,7 @@
         .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
+        /* Compact High-Density Table */
         .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
         .odoo-table th { padding: 8px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; background: #f9fafb; }
         .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; }
@@ -37,6 +38,7 @@
         .data-stack-title { font-weight: 700; color: #1e293b; font-size: 11px; margin-bottom: 1px; }
         .data-stack-sub { color: #64748b; font-size: 10px; }
         .data-stack-brand { color: var(--odoo-purple); font-weight: 600; font-size: 10px; }
+        .data-stack-emerald { color: #059669; font-weight: 700; }
         
         .status-dropdown {
             background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%; outline: none;
@@ -85,7 +87,7 @@
     <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
         <div class="flex flex-col text-left">
             <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <span class="breadcrumb-item" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
+                <span class="breadcrumb-item cursor-pointer" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
             </div>
             <div class="flex items-center gap-2 mt-1">
                 <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase text-[10px]">Live Refresh</button>
@@ -100,7 +102,8 @@
 
     <!-- Content Area -->
     <div class="table-scroll-container">
-        <table class="odoo-table w-full text-left table-fixed min-w-[1400px]" id="dataTable">
+        <!-- Reverted to flexible width without min-width constraint to prevent horizontal scrolling unless required by content -->
+        <table class="odoo-table w-full text-left table-fixed" id="dataTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
         </table>
@@ -169,11 +172,7 @@
         let activeRowIdx = null;
 
         window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const savedTab = params.get('tab');
-            if (savedTab) currentTab = savedTab;
             refreshData();
-            switchTab(currentTab);
         };
 
         function formatSheetTime(val) {
@@ -237,9 +236,10 @@
             document.getElementById('currentPath').innerText = currentTab;
             document.getElementById('backBtn').classList.add('hidden');
             let dataset = [];
+
             if (drillDown.type === 'client-jobs') {
-                dataset = (fullData.jobs || []).filter(j => (j.CLIENT_ID || j.CLIENT_NAME) === drillDown.id);
-                document.getElementById('currentPath').innerText = `Clients / ${drillDown.id} / Jobs`;
+                dataset = (fullData.jobs || []).filter(j => (j.CLIENT_ID === drillDown.id || j.CLIENT_NAME === drillDown.id));
+                document.getElementById('currentPath').innerText = `Clients / ${drillDown.label} / Jobs`;
                 document.getElementById('backBtn').classList.remove('hidden');
             } else if (drillDown.type === 'job-candidates') {
                 dataset = (fullData.candidates || []).filter(c => c.JOB_ID === drillDown.id);
@@ -254,11 +254,7 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            if (currentTab === 'Dashboard and Billing') {
-                filteredData = dataset;
-            } else {
-                filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID);
-            }
+            filteredData = dataset;
             renderTable();
         }
 
@@ -267,7 +263,11 @@
             const body = document.getElementById('tableBody');
             const empty = document.getElementById('noData');
             head.innerHTML = ""; body.innerHTML = "";
-            if (!filteredData || !filteredData.length) { empty.classList.remove('hidden'); return; }
+            
+            if (!filteredData || !filteredData.length) { 
+                empty.classList.remove('hidden'); 
+                return; 
+            }
             empty.classList.add('hidden');
 
             const isCandidatesView = (currentTab === 'Candidates' || drillDown.type === 'job-candidates');
@@ -275,6 +275,7 @@
             const isJobBoard = (currentTab === 'Job Board' && !drillDown.type);
             const isInterviews = (currentTab === 'Interview Tracker');
             const isBilling = (currentTab === 'Dashboard and Billing');
+            const isClients = (currentTab === 'Clients' && !drillDown.type);
 
             let headerHtml = "<tr><th class='w-12 px-2'><input type='checkbox'></th>";
             if (isCandidatesView) headerHtml += `<th class='w-28'>Job ID</th><th class='w-64'>Candidate</th><th class='w-56'>Applied For</th><th class='w-40'>Experience</th><th class='w-40'>CTC Details</th><th class='w-48'>Status</th><th class='w-24 text-center'>Docs</th>`;
@@ -282,18 +283,17 @@
             else if (isJobBoard) headerHtml += `<th class='w-24'>Job ID</th><th class='w-64'>Role & Location</th><th class='w-40'>Client ID</th><th class='w-48'>Exp & CTC</th><th class='w-32'>Status</th><th class='w-32'>Posted On</th>`;
             else if (isInterviews) headerHtml += `<th class='w-24'>ID</th><th class='w-64'>Candidate</th><th class='w-64'>Client & Role</th><th class='w-64'>Schedule</th><th class='w-48'>Next Step</th>`;
             else if (isBilling) headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Status</th>`;
+            else if (isClients) headerHtml += `<th class='w-32'>Client ID</th><th class='w-64'>Company Name</th><th class='w-48'>Contact Person</th><th class='w-48'>Contact Details</th><th class='w-40'>Status</th>`;
             else Object.keys(filteredData[0]).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             
-            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions</th></tr>";
+            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 z-20'>Actions Bar</th></tr>";
             head.innerHTML = headerHtml;
 
-            if (filteredData.length === 1 && filteredData[0]._IS_EMPTY) {
-                body.innerHTML = `<tr><td colspan="10" class="text-center py-20 text-slate-300 font-bold uppercase tracking-widest text-[10px]">No records found</td></tr>`;
-                return;
-            }
-
             filteredData.forEach((row, i) => {
-                let rowClick = (currentTab === 'Clients') ? `setDrillDown('client-jobs', '${row.CLIENT_ID || row.Client_ID}', '${row.COMPANY_NAME || row.Company_Name}')` : (currentTab === 'Job Board' ? `setDrillDown('job-candidates', '${row.JOB_ID}', '${row.POSITION_TITLE || row.TITLE}')` : '');
+                let rowClick = "";
+                if (isClients) rowClick = `setDrillDown('client-jobs', '${row.CLIENT_ID}', '${row.COMPANY_NAME}')`;
+                if (isJobBoard) rowClick = `setDrillDown('job-candidates', '${row.JOB_ID}', '${row.POSITION_TITLE}')`;
+
                 let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${rowClick}"><td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
                 
                 if (isCandidatesView) bRow += renderCandidatesRow(row);
@@ -305,9 +305,11 @@
                     bRow += `<td class='font-mono text-[10px] text-slate-400'>${row.INTERVIEW_ID || '--'}</td><td><div class='data-stack-title'>${row.CANDIDATE_NAME || '--'}</div><div class='data-stack-sub'>ID: ${row.CANDIDATE_ID || '--'}</div></td><td><div class='font-bold text-slate-700'>${row.COMPANY_NAME || '--'}</div><div class='data-stack-sub'>${row.POSITION_TITLE || '--'}</div></td><td><div class='text-indigo-600 font-bold'>${row.INTERVIEW_DATE || '--'} @ ${formatSheetTime(row.INTERVIEW_TIME)}</div><div class='data-stack-sub'>Mode: ${row.INTERVIEW_MODE || '--'}</div></td><td><select class="status-dropdown" onchange="updateStatus(${JSON.stringify(row)}, 'NEXT_STEP', this.value)">${opts.map(o => `<option value="${o}" ${status === o ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`;
                 } else if (isBilling) {
                     bRow += `<td><div class='data-stack-title'>${row.CLIENT_NAME || row.CLIENT || '--'}</div><div class='data-stack-sub'>${row.CANDIDATE_NAME || row.CANDIDATE || '--'}</div></td><td class='font-bold text-slate-700'>${row.JOINING_DATE || row.JOINED_DATE || '--'}</td><td><div class='data-stack-emerald'>₹${Number(row.BILLING_AMOUNT || row.AMOUNT || 0).toLocaleString()}</div><div class='data-stack-sub'>Comm: ${row.PERCENTAGE_COMMISSION || row.COMMISSION || '--'}%</div></td><td>${renderValue('PAYMENT_STATUS', row.PAYMENT_STATUS || row.STATUS)}</td>`;
+                } else if (isClients) {
+                    bRow += `<td><div class='font-mono text-[10px] text-slate-400'>${row.CLIENT_ID}</div></td><td><div class='data-stack-title'>${row.COMPANY_NAME}</div><div class='data-stack-sub'>${row.LOCATION || '--'}</div></td><td><div class='font-bold text-slate-700'>${row.CONTACT_PERSON || '--'}</div></td><td><div class='text-[10px] text-slate-600'>${row.EMAIL || '--'}</div><div class='text-[10px] font-bold text-purple-800'>${row.PHONE || '--'}</div></td><td>${renderValue('STATUS', row.STATUS)}</td>`;
                 } else Object.keys(row).filter(k => !k.startsWith('_')).forEach(k => bRow += `<td>${renderValue(k, row[k])}</td>`);
                 
-                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white shadow-[-4px_0_8px_rgba(0,0,0,0.02)] z-10" onclick="event.stopPropagation()"><div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div></td></tr>`;
+                bRow += `<td class="text-right px-4 shrink-0 sticky right-0 bg-white z-10" onclick="event.stopPropagation()"><div class="flex items-center justify-end gap-1.5">${renderActions(row, i)}</div></td></tr>`;
                 body.innerHTML += bRow;
             });
         }
@@ -349,30 +351,19 @@
             showLoader(true);
             const row = filteredData[idx];
             
-            // CRITICAL FIX: Find the actual job requirements from the Job Board sheet
+            // SMART LOOKUP FIX: Find job details from Job Board if sharing JD
             const jobId = row.JOB_ID || '';
-            const jobDetails = jobId ? fullData.jobs.find(j => j.JOB_ID === jobId) : null;
+            const job = fullData.jobs.find(j => j.JOB_ID === jobId) || {};
 
             try {
-                // NORMALIZATION: Merging candidate info with job-specific requirements
                 const rowData = { 
                     ...row, 
-                    // Use Job Board data for requirement fields if available
-                    POSITION_TITLE: (jobDetails ? (jobDetails.POSITION_TITLE || jobDetails.TITLE) : null) || row.POSITION_TITLE || row.JOB_TITLE || 'Position',
-                    COMPANY_NAME: (jobDetails ? (jobDetails.CLIENT_ID || jobDetails.COMPANY || jobDetails.CLIENT_NAME) : null) || row.COMPANY_NAME || row.CLIENT_ID || 'Raveone Consultants',
-                    LOCATION: (jobDetails ? (jobDetails.LOCATION || jobDetails.JOB_LOCATION) : null) || row.LOCATION || 'Bangalore',
-                    EXPERIENCE_REQUIRED: (jobDetails ? (jobDetails.EXPERIENCE_REQUIRED || jobDetails.MIN_EXPERIENCE) : null) || 'As per requirement',
-                    CTC_RANGE: (jobDetails ? (jobDetails.CTC_RANGE || jobDetails.MIN_SALARY) : null) || 'As per industry standards',
-                    
-                    // Candidate specific fields
+                    POSITION_TITLE: job.POSITION_TITLE || job.TITLE || row.POSITION_TITLE || row.JOB_TITLE || 'the Position',
+                    COMPANY_NAME: job.CLIENT_ID || job.COMPANY || job.CLIENT_NAME || row.COMPANY_NAME || 'Raveone Consultants',
+                    LOCATION: job.LOCATION || job.JOB_LOCATION || 'Bangalore',
+                    EXPERIENCE_REQUIRED: job.EXPERIENCE_REQUIRED || job.MIN_EXPERIENCE || 'As per requirement',
+                    CTC_RANGE: job.CTC_RANGE || job.MIN_SALARY || 'As per industry standards',
                     CANDIDATE_NAME: row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || 'Candidate',
-                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || 'N/A',
-                    RELEVANT_EXPERIENCE: row.RELEVANT_EXPERIENCE || 'N/A',
-                    CURRENT_CTC: row.CURRENT_CTC || 'N/A',
-                    LAST_CTC: row.CURRENT_CTC || 'N/A',
-                    EXPECTED_CTC: row.EXPECTED_CTC || 'N/A',
-                    NOTICE_PERIOD: row.NOTICE_PERIOD || 'N/A',
-                    
                     JOB_ID: jobId,
                     JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${jobId}`,
                     APP_LINK: `Apply using JD Link in www.raveone.in`
@@ -381,15 +372,19 @@
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 
-                let cleanMessage = res.message || "";
+                let rawMessage = res.message || "";
                 
+                // Aggressive Cleanup FIX: Remove redundant Regards and Company Name from template displaying
+                let cleanMessage = rawMessage.replace(/Regards,?\s*\n\s*Raveone Consultants\s*/gi, "");
+                cleanMessage = cleanMessage.trim();
+
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME;
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
                 document.getElementById('emailSubject').innerText = res.subject || "CRM Portal Update";
                 document.getElementById('messageBody').value = cleanMessage;
                 
-                const rawPh = (res.phone || row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
+                const rawPh = (row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
                 const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
                 document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(cleanMessage)}`, '_blank');
                 document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(res.subject || "Update")}&body=${encodeURIComponent(cleanMessage)}`, '_blank');
@@ -446,11 +441,13 @@
             
             let subject = "";
             let message = "";
+            
+            // Unified Signature FIX: Cleaned to prevent duplication
             const signature = "\n\nRegards,\nDr. Rajesh K Rao\nRaveone Consultants\nrajesh@raveone.in  II 9148330565 II";
 
             if (mode === "F2F") {
                 subject = `Interview Invitation: ${role} at ${company}`;
-                message = `Hi ${candidateName},\n\nThank you for your interest in ${company}. We would like to invite you for an in-person interview.\n\nWhen: ${dateStr} at ${timeStr} IST\nWhere: ${location}\n\nPlease confirm your availability.\n\nBest regards,\nDr. Rajesh K Rao`;
+                message = `Hi ${candidateName},\n\nThank you for your interest in ${company}. We would like to invite you for an in-person interview.\n\nWhen: ${dateStr} at ${timeStr} IST\nWhere: ${location}\n\nPlease confirm your availability.`;
             } else if (mode === "Telephonic") {
                 subject = `Phone Interview with ${company}`;
                 message = `Hi ${candidateName},\n\nWe reviewed your profile for ${role} and would like to schedule a call.\n\nTime: ${dateStr} at ${timeStr} IST\nNumber: ${location || 'We will call your registered number'}\n\nPlease confirm if this works.`;
@@ -477,7 +474,14 @@
             openModal('messageModal');
         }
 
-        function handleFilter() { const q = document.getElementById('globalSearch').value.toLowerCase(); renderUI(); if (q) filteredData = filteredData.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q))); renderTable(); }
+        function handleFilter() { 
+            const q = document.getElementById('globalSearch').value.toLowerCase(); 
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(tr => {
+                const text = tr.innerText.toLowerCase();
+                tr.style.display = text.includes(q) ? '' : 'none';
+            });
+        }
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
