@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiregrow CRM | Odoo Enterprise Edition</title>
+    <title>Hiregrow CRM | Raveone Consultants</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -15,7 +15,6 @@
         .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
-        /* Compact High-Density Table */
         .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
         .odoo-table th { padding: 8px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; background: #f9fafb; }
         .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; }
@@ -38,7 +37,6 @@
         .data-stack-title { font-weight: 700; color: #1e293b; font-size: 11px; margin-bottom: 1px; }
         .data-stack-sub { color: #64748b; font-size: 10px; }
         .data-stack-brand { color: var(--odoo-purple); font-weight: 600; font-size: 10px; }
-        .data-stack-emerald { color: #059669; font-weight: 700; }
         
         .status-dropdown {
             background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%; outline: none;
@@ -114,14 +112,12 @@
 
     <!-- Communication Modal -->
     <div id="messageModal" class="modal-overlay">
-        <!-- Added max-h-[90vh] to keep modal within viewport height -->
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
                 <div class="text-left"><h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
                 <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Personalized Message</p></div>
                 <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <!-- Added overflow-y-auto and flex-1 to allow body content scrolling -->
             <div class="p-6 space-y-4 text-left overflow-y-auto flex-1">
                 <div id="emailSubjectContainer"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
                 <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div></div>
@@ -140,18 +136,16 @@
 
     <!-- Interview Modal -->
     <div id="interviewModal" class="modal-overlay">
-        <!-- Added max-h-[90vh] -->
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
             <div class="p-4 border-b bg-indigo-50 flex items-center justify-between">
                 <h3 class="font-bold text-indigo-800 text-xs uppercase tracking-widest text-left">Schedule Interview</h3>
                 <button onclick="closeModal('interviewModal')" class="p-1 hover:bg-white rounded-full"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <!-- Added overflow-y-auto and flex-1 -->
             <div class="p-6 space-y-4 text-left overflow-y-auto flex-1">
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Date</label>
                     <input type="date" id="intDate" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
-                    <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Time</label>
+                    <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Time (IST)</label>
                     <input type="time" id="intTime" value="11:00" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs"></div>
                 </div>
                 <div><label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Format</label>
@@ -178,7 +172,7 @@
             const params = new URLSearchParams(window.location.search);
             const savedTab = params.get('tab');
             if (savedTab) currentTab = savedTab;
-            if (!API_URL.includes("PASTE_YOUR")) refreshData();
+            refreshData();
             switchTab(currentTab);
         };
 
@@ -260,9 +254,8 @@
                 else if (currentTab === 'Clients') dataset = fullData.clients || [];
             }
             
-            // Fixed filter logic to ensure Billing data shows up
             if (currentTab === 'Dashboard and Billing') {
-                filteredData = dataset; // Do not apply the generic filter for billing, show all rows
+                filteredData = dataset;
             } else {
                 filteredData = dataset.filter(r => r._IS_EMPTY || r.JOB_ID || r.CANDIDATE_NAME || r.CLIENT_ID || r.COMPANY_NAME || r.CLIENT_NAME || r.INTERVIEW_ID);
             }
@@ -291,7 +284,7 @@
             else if (isBilling) headerHtml += `<th class='w-64'>Client / Candidate</th><th class='w-32'>Joined</th><th class='w-48'>Financials</th><th class='w-40'>Status</th>`;
             else Object.keys(filteredData[0]).filter(k => !k.startsWith('_')).forEach(k => headerHtml += `<th>${k.replace(/_/g, ' ')}</th>`);
             
-            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions Bar</th></tr>";
+            headerHtml += "<th class='text-right px-4 sticky right-0 bg-slate-50 w-32 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-20'>Actions</th></tr>";
             head.innerHTML = headerHtml;
 
             if (filteredData.length === 1 && filteredData[0]._IS_EMPTY) {
@@ -300,7 +293,7 @@
             }
 
             filteredData.forEach((row, i) => {
-                let rowClick = (currentTab === 'Clients') ? `setDrillDown('client-jobs', '${row.CLIENT_ID || row.Client_ID}', '${row.COMPANY_NAME || row.Company_Name}')` : (currentTab === 'Job Board' ? `setDrillDown('job-candidates', '${row.JOB_ID || row.JOB_ID}', '${row.POSITION_TITLE || row.TITLE}')` : '');
+                let rowClick = (currentTab === 'Clients') ? `setDrillDown('client-jobs', '${row.CLIENT_ID || row.Client_ID}', '${row.COMPANY_NAME || row.Company_Name}')` : (currentTab === 'Job Board' ? `setDrillDown('job-candidates', '${row.JOB_ID}', '${row.POSITION_TITLE || row.TITLE}')` : '');
                 let bRow = `<tr class="border-b transition-colors hover:bg-slate-50" onclick="${rowClick}"><td class='px-2' onclick="event.stopPropagation()"><input type='checkbox'></td>`;
                 
                 if (isCandidatesView) bRow += renderCandidatesRow(row);
@@ -355,40 +348,41 @@
         async function compose(key, idx) {
             showLoader(true);
             const row = filteredData[idx];
+            
+            // CRITICAL FIX: Find the actual job requirements from the Job Board sheet
+            const jobId = row.JOB_ID || '';
+            const jobDetails = jobId ? fullData.jobs.find(j => j.JOB_ID === jobId) : null;
+
             try {
-                // NORMALIZATION FOR COMMUNICATION
+                // NORMALIZATION: Merging candidate info with job-specific requirements
                 const rowData = { 
                     ...row, 
-                    CANDIDATE_NAME: row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || 'Candidate',
-                    POSITION_TITLE: row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || row.POSITION || 'the Position',
-                    COMPANY_NAME: row.COMPANY_NAME || row.CLIENT_ID || row.COMPANY || row.CLIENT_NAME || 'Raveone Consultants',
-                    LOCATION: row.LOCATION || row.JOB_LOCATION || row.CURRENT_LOCATION || 'Bangalore',
-                    EXPERIENCE_REQUIRED: row.EXPERIENCE_REQUIRED || row.TOTAL_EXPERIENCE || row.TOTAL_EXPERIENCE_YRS || row.MIN_EXPERIENCE || '2-3 years',
-                    CTC_RANGE: row.CTC_RANGE || row.EXPECTED_CTC || row.MIN_SALARY || 'As per industry standards',
-                    JOB_ID: row.JOB_ID || 'N/A',
+                    // Use Job Board data for requirement fields if available
+                    POSITION_TITLE: (jobDetails ? (jobDetails.POSITION_TITLE || jobDetails.TITLE) : null) || row.POSITION_TITLE || row.JOB_TITLE || 'Position',
+                    COMPANY_NAME: (jobDetails ? (jobDetails.CLIENT_ID || jobDetails.COMPANY || jobDetails.CLIENT_NAME) : null) || row.COMPANY_NAME || row.CLIENT_ID || 'Raveone Consultants',
+                    LOCATION: (jobDetails ? (jobDetails.LOCATION || jobDetails.JOB_LOCATION) : null) || row.LOCATION || 'Bangalore',
+                    EXPERIENCE_REQUIRED: (jobDetails ? (jobDetails.EXPERIENCE_REQUIRED || jobDetails.MIN_EXPERIENCE) : null) || 'As per requirement',
+                    CTC_RANGE: (jobDetails ? (jobDetails.CTC_RANGE || jobDetails.MIN_SALARY) : null) || 'As per industry standards',
                     
-                    // NEW: Mappings for Candidate Submission Template to prevent blank placeholders
-                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || row.TOTAL_EXP || row.EXPERIENCE || 'N/A',
-                    RELEVANT_EXPERIENCE: row.RELEVANT_EXPERIENCE || row.RELEVANT_EXP || 'N/A',
-                    CURRENT_LOCATION: row.CURRENT_LOCATION || row.LOCATION || row.CITY || 'N/A',
-                    CURRENT_CTC: row.CURRENT_CTC || row.CTC || row.LAST_CTC || 'N/A',
-                    LAST_CTC: row.CURRENT_CTC || row.CTC || row.LAST_CTC || 'N/A', // Explicit mapping for LAST_CTC placeholder
-                    EXPECTED_CTC: row.EXPECTED_CTC || row.ECTC || 'N/A',
-                    NOTICE_PERIOD: row.NOTICE_PERIOD || row.NOTICE || 'N/A',
-
-                    JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${row.JOB_ID || ''}`,
-                    // NEW: Fixed Application Link Text
+                    // Candidate specific fields
+                    CANDIDATE_NAME: row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || 'Candidate',
+                    TOTAL_EXPERIENCE: row.TOTAL_EXPERIENCE || 'N/A',
+                    RELEVANT_EXPERIENCE: row.RELEVANT_EXPERIENCE || 'N/A',
+                    CURRENT_CTC: row.CURRENT_CTC || 'N/A',
+                    LAST_CTC: row.CURRENT_CTC || 'N/A',
+                    EXPECTED_CTC: row.EXPECTED_CTC || 'N/A',
+                    NOTICE_PERIOD: row.NOTICE_PERIOD || 'N/A',
+                    
+                    JOB_ID: jobId,
+                    JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${jobId}`,
                     APP_LINK: `Apply using JD Link in www.raveone.in`
                 };
 
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
                 const res = await resp.json();
                 
-                // CLIENT-SIDE CLEANUP (Fallback if backend regex misses or isn't deployed)
                 let cleanMessage = res.message || "";
-                cleanMessage = cleanMessage.replace(/https:\/\/forms\.gle\/TEn6Ws23TtsdKeyN7/g, "Apply using JD Link in www.raveone.in");
-                cleanMessage = cleanMessage.replace(/📝 Apply here:\s*Apply using/gi, "Apply using"); // Clean up label if it exists
-
+                
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
                 document.getElementById('modalSubtitle').innerText = rowData.CANDIDATE_NAME;
                 document.getElementById('emailSubjectContainer').style.display = key.includes('WA') ? 'none' : 'block';
@@ -418,31 +412,29 @@
             const inp = document.getElementById('intLocation');
             const row = filteredData[activeRowIdx];
             
-            // Auto-fetch logic for Client Address or Phone
             if (fmt === 'Google Meet') { 
                 lbl.innerText = "Meeting Link"; 
                 inp.value = "https://meet.google.com/vcj-dfaf-pcc"; 
             }
             else if (fmt === 'Telephonic') { 
                 lbl.innerText = "Interviewer / Phone Number"; 
-                // Try to find client phone number from client ID
                 const client = fullData.clients.find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
-                inp.value = client ? (client.PHONE || client.CONTACT_PERSON_PHONE || row.PHONE) : ""; 
+                inp.value = client ? (client.PHONE || client.CONTACT_PERSON_PHONE || "") : ""; 
             }
             else { 
                 lbl.innerText = "Venue Address"; 
                 const client = fullData.clients.find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
-                inp.value = client ? (client.ADDRESS || client.LOCATION || "Client Office") : "Bangalore Office"; 
+                inp.value = client ? (client.ADDRESS || client.LOCATION || "") : "Bangalore Office"; 
             }
         }
 
         function submitInterviewInvite() {
-            // No loading needed for local generation
             const dateInput = document.getElementById('intDate').value;
             if(!dateInput) { alert("Please select a date"); return; }
             
-            const date = new Date(dateInput).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            const time = document.getElementById('intTime').value;
+            const dateObj = new Date(dateInput);
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            const timeStr = document.getElementById('intTime').value;
             const mode = document.getElementById('intFormat').value;
             const location = document.getElementById('intLocation').value;
             const row = filteredData[activeRowIdx];
@@ -450,27 +442,24 @@
             const candidateName = (row.CANDIDATE_NAME || "Candidate").split(' ')[0];
             const fullName = row.CANDIDATE_NAME || "Candidate";
             const role = row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || "the position";
-            const company = row.COMPANY_NAME || row.CLIENT_ID || row.CLIENT_NAME || "the company";
+            const company = row.COMPANY_NAME || row.CLIENT_ID || row.CLIENT_NAME || "Raveone Consultants";
             
             let subject = "";
             let message = "";
-            const signature = "\n\nSignature \nDr. Rajesh K Rao\nRaveone Consultants\nrajesh@raveone.in  II 9148330565 II";
+            const signature = "\n\nRegards,\nDr. Rajesh K Rao\nRaveone Consultants\nrajesh@raveone.in  II 9148330565 II";
 
             if (mode === "F2F") {
                 subject = `Interview Invitation: ${role} at ${company}`;
-                message = `Hi ${candidateName},\n\nThank you for your interest in ${company}. We were impressed by your application and would like to invite you to our office for an in-person interview.\n\nYou will be meeting with [Interviewer Name/Title] to discuss your background and the role in more detail.\n\nWhen: ${date} at ${time}\nWhere: ${location}\n\nWhen you arrive, please ask for [Name of Receptionist or Host] at the front desk.\n\nPlease let me know if this time works for you, or feel free to suggest a few alternatives.\n\nBest regards,\n[Your Name]`;
+                message = `Hi ${candidateName},\n\nThank you for your interest in ${company}. We would like to invite you for an in-person interview.\n\nWhen: ${dateStr} at ${timeStr} IST\nWhere: ${location}\n\nPlease confirm your availability.\n\nBest regards,\nDr. Rajesh K Rao`;
             } else if (mode === "Telephonic") {
                 subject = `Phone Interview with ${company}`;
-                message = `Hi ${candidateName},\n\nI hope you are having a good week.\n\nI reviewed your application for the ${role} position and would love to set up a short phone call to discuss your experience and share more about our team.\n\nAre you available for a 15-20 minute chat on ${date} at ${time}?\n\nIf that works, please let me know the best number to reach you at. If not, please suggest a few times that fit your schedule.\n\nBest,\n[Your Name]`;
-            } else { // Google Meet
+                message = `Hi ${candidateName},\n\nWe reviewed your profile for ${role} and would like to schedule a call.\n\nTime: ${dateStr} at ${timeStr} IST\nNumber: ${location || 'We will call your registered number'}\n\nPlease confirm if this works.`;
+            } else { 
                 subject = `Video Interview: ${role} / ${fullName}`;
-                message = `Hi ${candidateName},\n\nWe are excited to move forward with your application for the ${role} position. We would like to schedule a video interview via Google Meet.\n\nDate: ${date}\nTime: ${time}\nLink: ${location}\n\nYou will be speaking with [Interviewer Name]. Please make sure you are in a quiet place with a stable internet connection.\n\nPlease reply to confirm if this time works for you.\n\nLooking forward to seeing you then!\n\nRegards,\n[Your Name]`;
+                message = `Hi ${candidateName},\n\nWe are scheduling a video interview for the ${role} position.\n\nDate: ${dateStr}\nTime: ${timeStr} IST\nLink: ${location}\n\nPlease confirm your availability.`;
             }
 
-            // Replace [Your Name] and append signature
-            message = message.replace("[Your Name]", ""); 
             message += signature;
-
             closeModal('interviewModal');
             
             document.getElementById('modalTitle').innerText = "INTERVIEW INVITE";
@@ -478,9 +467,8 @@
             document.getElementById('emailSubject').innerText = subject;
             document.getElementById('messageBody').value = message;
             
-            // Update WA button to include subject as bold header
             const waMsg = `*${subject}*\n\n${message}`;
-            const rawPh = (row.PHONE || row.SOURCED_PHONE || "").toString().replace(/\D/g, '');
+            const rawPh = (row.PHONE || "").toString().replace(/\D/g, '');
             const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
             
             document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -493,7 +481,7 @@
         function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); alert("Copied to clipboard!"); }
+        function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); }
         async function testConnection() {
             showLoader(true);
             try {
