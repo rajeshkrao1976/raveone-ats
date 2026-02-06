@@ -15,7 +15,6 @@
         .btn-brand { background-color: var(--odoo-purple); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         .btn-teal { background-color: var(--odoo-teal); color: white; border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; }
         
-        /* Compact High-Density Table */
         .odoo-table thead { background-color: #f9fafb; border-bottom: 2px solid var(--odoo-border); position: sticky; top: 0; z-index: 10; }
         .odoo-table th { padding: 8px 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-right: 1px solid var(--odoo-border); color: #64748b; white-space: nowrap; background: #f9fafb; }
         .odoo-table td { padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; vertical-align: top; line-height: 1.4; }
@@ -102,7 +101,6 @@
 
     <!-- Content Area -->
     <div class="table-scroll-container">
-        <!-- Reverted to flexible width without min-width constraint to prevent horizontal scrolling unless required by content -->
         <table class="odoo-table w-full text-left table-fixed" id="dataTable">
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
@@ -117,15 +115,21 @@
     <div id="messageModal" class="modal-overlay">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col transform transition-all border border-slate-200">
             <div class="p-4 border-b bg-slate-50 flex items-center justify-between">
-                <div class="text-left"><h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
-                <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Personalized Message</p></div>
+                <div class="text-left">
+                    <h3 id="modalTitle" class="font-bold text-slate-800 text-sm uppercase">Preview</h3>
+                    <p id="modalSubtitle" class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Personalized Message</p>
+                </div>
                 <button onclick="closeModal('messageModal')" class="p-1 hover:bg-slate-200 rounded-full text-slate-400"><i class="ph ph-x text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4 text-left overflow-y-auto flex-1">
-                <div id="emailSubjectContainer"><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
-                <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div></div>
-                <div><label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Body</label>
-                <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-purple-500 outline-none"></textarea></div>
+                <div id="emailSubjectContainer">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Subject Line</label>
+                    <div id="emailSubject" class="p-3 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-slate-700"></div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Message Body</label>
+                    <textarea id="messageBody" class="w-full h-80 p-4 bg-slate-50 border border-slate-200 rounded text-xs leading-relaxed text-slate-600 focus:ring-1 focus:ring-purple-500 outline-none"></textarea>
+                </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex items-center justify-between">
                 <button onclick="copyMessage()" class="text-[10px] font-black text-slate-500 hover:text-purple-600 flex items-center gap-2"><i class="ph ph-copy text-lg"></i> Copy Message</button>
@@ -343,30 +347,48 @@
             if (currentTab === 'Job Board') html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button><button onclick="compose('CANDIDATE_JD_SHARE', ${i})" class="action-btn text-indigo-500" title="Email JD"><i class="ph ph-envelope-simple text-base"></i></button>`;
             else if (currentTab === 'Clients') html += `<button onclick="compose('CLIENT_CHECK_IN', ${i})" class="action-btn text-emerald-600" title="WA Client"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
             else if (currentTab === 'Dashboard and Billing') html += `<button onclick="compose('BILLING_REMINDER_WA', ${i})" class="action-btn text-emerald-600" title="WA Reminder"><i class="ph ph-whatsapp-logo text-base"></i></button>`;
-            else html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button><button onclick="compose('CLIENT_CANDIDATE_SUBMISSION_WA', ${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button><button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
+            else html += `<button onclick="compose('CANDIDATE_JD_SHARE_WA', ${i})" class="action-btn text-emerald-600" title="WA JD"><i class="ph ph-whatsapp-logo text-base"></i></button><button onclick="CLIENT_CANDIDATE_SUBMISSION_WA_PROMPT(${i})" class="action-btn text-blue-600" title="Submit Snapshot"><i class="ph ph-user-circle-plus text-base"></i></button><button onclick="openIntModal(${i})" class="action-btn text-indigo-500" title="Interview"><i class="ph ph-calendar-plus text-base"></i></button>`;
             return html;
         }
 
+        /**
+         * UPDATED: Enhanced compose with explicit Job Data fetching for Sourced tab
+         */
         async function compose(key, idx) {
             showLoader(true);
             const row = filteredData[idx];
             
-            // SMART LOOKUP FIX: Find job details from Job Board if sharing JD
+            // SMART LOOKUP: Find job details from Job Board if sharing JD
             const jobId = row.JOB_ID || '';
-            const job = fullData.jobs.find(j => j.JOB_ID === jobId) || {};
+            const job = (fullData.jobs || []).find(j => j.JOB_ID === jobId) || {};
 
             try {
+                // FIXED: Enhanced mapping to ensure Job Board fields are pulled correctly
                 const rowData = { 
                     ...row, 
+                    // Job Meta (Pulled from fullData.jobs using JOB_ID)
                     POSITION_TITLE: job.POSITION_TITLE || job.TITLE || row.POSITION_TITLE || row.JOB_TITLE || 'the Position',
                     COMPANY_NAME: job.CLIENT_ID || job.COMPANY || job.CLIENT_NAME || row.COMPANY_NAME || 'Raveone Consultants',
-                    LOCATION: job.LOCATION || job.JOB_LOCATION || 'Bangalore',
-                    EXPERIENCE_REQUIRED: job.EXPERIENCE_REQUIRED || job.MIN_EXPERIENCE || 'As per requirement',
-                    CTC_RANGE: job.CTC_RANGE || job.MIN_SALARY || 'As per industry standards',
+                    LOCATION: job.LOCATION || job.JOB_LOCATION || row.LOCATION || row.CURRENT_LOCATION || 'Bangalore',
+                    
+                    // FIXED: Pulling specific Job Requirements for Sourced tab placeholders
+                    EXPERIENCE_REQUIRED: job.EXPERIENCE_REQUIRED || job.MIN_EXPERIENCE || '--',
+                    CTC_RANGE: job.CTC_RANGE || job.MIN_SALARY || '--',
+                    
+                    // Candidate Meta (Fallback Logic)
                     CANDIDATE_NAME: row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || 'Candidate',
                     JOB_ID: jobId,
+                    
+                    // Field Alias Mapping for template tags like {{LAST_CTC}}
+                    LAST_CTC: row.CURRENT_CTC || row.LAST_CTC || '--',
+                    TOTAL_EXP: row.TOTAL_EXPERIENCE || row.TOTAL_EXP || '--',
+                    RELEVANT_EXP: row.RELEVANT_EXPERIENCE || row.RELEVANT_EXP || '--',
+                    NOTICE: row.NOTICE_PERIOD || row.NOTICE || 'N/A',
+                    EXPECTED_CTC: row.EXPECTED_CTC || '--',
+                    
+                    // Links
                     JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${jobId}`,
-                    APP_LINK: `Apply using JD Link in www.raveone.in`
+                    APP_LINK: `Apply using JD Link at https://www.raveone.in/careers`
                 };
 
                 const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
@@ -374,8 +396,12 @@
                 
                 let rawMessage = res.message || "";
                 
-                // Aggressive Cleanup FIX: Remove redundant Regards and Company Name from template displaying
+                // Cleanup 1: Remove redundant Regards
                 let cleanMessage = rawMessage.replace(/Regards,?\s*\n\s*Raveone Consultants\s*/gi, "");
+
+                // Cleanup 2: Hard Override legacy link
+                cleanMessage = cleanMessage.replace(/https:\/\/forms\.gle\/TEn6Ws23TtsdKeyN7/g, "Apply using JD Link at https://www.raveone.in/careers");
+
                 cleanMessage = cleanMessage.trim();
 
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
@@ -413,12 +439,12 @@
             }
             else if (fmt === 'Telephonic') { 
                 lbl.innerText = "Interviewer / Phone Number"; 
-                const client = fullData.clients.find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
+                const client = (fullData.clients || []).find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
                 inp.value = client ? (client.PHONE || client.CONTACT_PERSON_PHONE || "") : ""; 
             }
             else { 
                 lbl.innerText = "Venue Address"; 
-                const client = fullData.clients.find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
+                const client = (fullData.clients || []).find(c => c.CLIENT_ID === (row.CLIENT_ID || row.COMPANY_NAME));
                 inp.value = client ? (client.ADDRESS || client.LOCATION || "") : "Bangalore Office"; 
             }
         }
@@ -442,7 +468,6 @@
             let subject = "";
             let message = "";
             
-            // Unified Signature FIX: Cleaned to prevent duplication
             const signature = "\n\nRegards,\nDr. Rajesh K Rao\nRaveone Consultants\nrajesh@raveone.in  II 9148330565 II";
 
             if (mode === "F2F") {
@@ -472,6 +497,10 @@
             document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`, '_blank');
 
             openModal('messageModal');
+        }
+
+        function CLIENT_CANDIDATE_SUBMISSION_WA_PROMPT(idx) {
+            compose('CLIENT_CANDIDATE_SUBMISSION_WA', idx);
         }
 
         function handleFilter() { 
