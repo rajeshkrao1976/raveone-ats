@@ -48,7 +48,7 @@
 </head>
 <body class="main-viewport">
 
-    <!-- Auth Guard -->
+    <!-- Auth Guard (Always visible initially) -->
     <div id="loginOverlay">
         <div class="login-card">
             <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-16 w-16 mx-auto mb-4 rounded-lg shadow-sm">
@@ -66,65 +66,68 @@
         </div>
     </div>
 
-    <div id="loader">
-        <div class="spinner mb-4"></div>
-        <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Hiregrow State</p>
-    </div>
+    <!-- Main Content Wrapper (Hidden by default using 'hidden' class) -->
+    <div id="mainContentWrapper" class="hidden flex flex-col h-full w-full">
+        <div id="loader">
+            <div class="spinner mb-4"></div>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-pulse">Syncing Hiregrow State</p>
+        </div>
 
-    <!-- Top Navbar -->
-    <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
-        <div class="flex items-center gap-6 h-full">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="handleLogout()">
-                <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5">
-                <div class="flex flex-col leading-none text-left">
-                    <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
-                    <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase text-white/80">Consultants</span>
+        <!-- Top Navbar -->
+        <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
+            <div class="flex items-center gap-6 h-full">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="handleLogout()">
+                    <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5">
+                    <div class="flex flex-col leading-none text-left">
+                        <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
+                        <span class="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase text-white/80">Consultants</span>
+                    </div>
+                </div>
+                <nav class="flex gap-4 h-full text-[10px] font-bold uppercase tracking-wider" id="mainNav">
+                    <button onclick="switchTab('Job Board')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Job Board</button>
+                    <button onclick="switchTab('Sourced')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Sourced</button>
+                    <button onclick="switchTab('Candidates')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Candidates</button>
+                    <button onclick="switchTab('Interview Tracker')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Interviews</button>
+                    <button onclick="switchTab('Clients')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Clients</button>
+                    <button onclick="switchTab('Dashboard and Billing')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Billing</button>
+                </nav>
+            </div>
+            <div class="ml-auto flex items-center gap-3">
+                <button onclick="syncWebsiteApplications()" class="text-[9px] font-bold bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1 hover:bg-emerald-700 shadow-md">
+                    <i class="ph ph-arrows-clockwise"></i> Sync Website
+                </button>
+                <div class="h-6 w-[1px] bg-white/20"></div>
+                <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-all uppercase">Test API</button>
+            </div>
+        </header>
+
+        <!-- Sub-header -->
+        <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
+            <div class="flex flex-col text-left">
+                <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                    <span class="breadcrumb-item cursor-pointer" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
+                </div>
+                <div class="flex items-center gap-2 mt-1">
+                    <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase text-[10px]">Live Refresh</button>
+                    <button id="backBtn" onclick="drillBack()" class="btn-brand bg-slate-100 !text-slate-700 hover:bg-slate-200 py-0.5 px-3 hidden text-[10px]">Back</button>
                 </div>
             </div>
-            <nav class="flex gap-4 h-full text-[10px] font-bold uppercase tracking-wider" id="mainNav">
-                <button onclick="switchTab('Job Board')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Job Board</button>
-                <button onclick="switchTab('Sourced')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Sourced</button>
-                <button onclick="switchTab('Candidates')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Candidates</button>
-                <button onclick="switchTab('Interview Tracker')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Interviews</button>
-                <button onclick="switchTab('Clients')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Clients</button>
-                <button onclick="switchTab('Dashboard and Billing')" class="h-full px-1 opacity-70 hover:opacity-100 border-b-2 border-transparent transition-all">Billing</button>
-            </nav>
-        </div>
-        <div class="ml-auto flex items-center gap-3">
-            <button onclick="syncWebsiteApplications()" class="text-[9px] font-bold bg-emerald-600 text-white px-3 py-1.5 rounded uppercase flex items-center gap-1 hover:bg-emerald-700 shadow-md">
-                <i class="ph ph-arrows-clockwise"></i> Sync Website
-            </button>
-            <div class="h-6 w-[1px] bg-white/20"></div>
-            <button onclick="testConnection()" class="text-[10px] font-bold bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-all uppercase">Test API</button>
-        </div>
-    </header>
-
-    <!-- Sub-header -->
-    <div class="bg-white py-1.5 px-6 flex items-center justify-between border-b shrink-0 h-14">
-        <div class="flex flex-col text-left">
-            <div id="breadcrumb" class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <span class="breadcrumb-item cursor-pointer" onclick="resetApp()">CRM</span> / <span id="currentPath">Job Board</span>
-            </div>
-            <div class="flex items-center gap-2 mt-1">
-                <button onclick="refreshData()" class="btn-teal py-0.5 px-3 uppercase text-[10px]">Live Refresh</button>
-                <button id="backBtn" onclick="drillBack()" class="btn-brand bg-slate-100 !text-slate-700 hover:bg-slate-200 py-0.5 px-3 hidden text-[10px]">Back</button>
+            <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-[#714B67] transition-all ml-6">
+                <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
             </div>
         </div>
-        <div class="flex-1 max-w-md bg-slate-100 border rounded px-3 flex items-center focus-within:bg-white focus-within:ring-1 focus-within:ring-[#714B67] transition-all ml-6">
-            <i class="ph ph-magnifying-glass text-slate-400 mr-2"></i>
-            <input type="text" id="globalSearch" onkeyup="handleFilter()" placeholder="Search active data..." class="w-full bg-transparent py-1.5 text-xs outline-none">
-        </div>
-    </div>
 
-    <!-- Content Area -->
-    <div class="table-scroll-container">
-        <table class="odoo-table w-full text-left table-fixed" id="dataTable">
-            <thead id="tableHead"></thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-        <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
-            <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
-            <p class="font-bold uppercase tracking-widest text-xs">No matching records found</p>
+        <!-- Content Area -->
+        <div class="table-scroll-container">
+            <table class="odoo-table w-full text-left table-fixed" id="dataTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div id="noData" class="flex flex-col items-center justify-center py-40 text-slate-300 hidden">
+                <i class="ph ph-mask-sad text-6xl opacity-20 mb-4"></i>
+                <p class="font-bold uppercase tracking-widest text-xs">No matching records found</p>
+            </div>
         </div>
     </div>
 
@@ -199,8 +202,12 @@
         window.onload = function() {
             const token = getAuthToken();
             if(token) {
-                document.getElementById('loginOverlay').style.display = 'none';
+                // Verification is handled by refreshData
                 refreshData();
+            } else {
+                // Ensure everything is hidden
+                document.getElementById('loginOverlay').style.display = 'flex';
+                document.getElementById('mainContentWrapper').classList.add('hidden');
             }
         };
 
@@ -209,14 +216,17 @@
             if(!t) return;
             showLoader(true);
             try {
+                // Test the token against the API
                 const resp = await fetch(`${API_URL}?action=getAllData&token=${t}`);
                 const res = await resp.json();
                 if(res.error) {
                     document.getElementById('loginError').classList.remove('hidden');
+                    document.getElementById('mainContentWrapper').classList.add('hidden');
                 } else {
                     setAuthToken(t);
                     fullData = res;
                     document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContentWrapper').classList.remove('hidden');
                     renderUI();
                 }
             } catch(e) { alert("Server connectivity error."); }
@@ -248,6 +258,10 @@
                 const resp = await fetch(`${API_URL}?action=getAllData&token=${token}`);
                 fullData = await resp.json();
                 if(fullData.error) throw new Error(fullData.error);
+                
+                // Show content only after data is successfully loaded
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContentWrapper').classList.remove('hidden');
                 renderUI();
             } catch (err) { 
                 console.error("Sync error:", err); 
