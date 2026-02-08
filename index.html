@@ -36,18 +36,35 @@
         
         .data-stack-title { font-weight: 700; color: #1e293b; font-size: 11px; margin-bottom: 1px; }
         .data-stack-sub { color: #64748b; font-size: 10px; }
-        .data-stack-brand { color: var(--odoo-purple); font-weight: 600; font-size: 10px; }
-        .data-stack-emerald { color: #059669; font-weight: 700; }
-        
-        .status-dropdown {
-            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%; outline: none;
-        }
+        .status-dropdown { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer; width: 100%; outline: none; }
+
+        /* Login Overlay Styling */
+        #loginOverlay { position: fixed; inset: 0; background: #714B67; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 360px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="main-viewport">
+
+    <!-- Auth Guard -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-16 w-16 mx-auto mb-4 rounded-lg shadow-sm">
+            <h2 class="text-xl font-extrabold text-slate-800 tracking-tight mb-1">RAVEONE CRM</h2>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Internal Access Gateway</p>
+            
+            <div class="space-y-4">
+                <div class="text-left">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Security Auth Token</label>
+                    <input type="password" id="authTokenInput" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#714B67] outline-none transition-all" placeholder="Enter Token...">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-[#714B67] text-white font-bold py-3 rounded-lg text-sm shadow-lg hover:bg-[#5a3b52] transition-all uppercase tracking-widest">Connect to Database</button>
+                <p id="loginError" class="text-rose-500 text-[10px] font-bold uppercase hidden">Access Denied: Invalid Token</p>
+            </div>
+        </div>
+    </div>
 
     <div id="loader">
         <div class="spinner mb-4"></div>
@@ -57,7 +74,7 @@
     <!-- Top Navbar -->
     <header class="odoo-header h-12 flex items-center px-4 shrink-0 shadow-sm z-50">
         <div class="flex items-center gap-6 h-full">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="resetApp()">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="handleLogout()">
                 <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-8 w-8 rounded bg-white p-0.5">
                 <div class="flex flex-col leading-none text-left">
                     <span class="font-extrabold text-sm tracking-tighter uppercase">RAVEONE</span>
@@ -168,16 +185,50 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzqzOBMSEf8XoZX0QZlQy6PbFIcGS2QxxKuDp2OFCXvXrYluIOHGsPtD6-Ucu5hGbBh/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzhV1DMYAF3dn2FZ74To4PVjbf_VzulXG77L1d2Zg8P65y8RDLIhQaxhOfLAmhD15vX/exec"; 
         let currentTab = 'Job Board';
         let drillDown = { type: null, id: null, label: null };
         let fullData = { jobs: [], candidates: [], sourced: [], interviews: [], clients: [], billing: [] };
         let filteredData = [];
         let activeRowIdx = null;
 
+        // AUTH SYSTEM
+        function getAuthToken() { return sessionStorage.getItem('hg_crm_token'); }
+        function setAuthToken(t) { sessionStorage.setItem('hg_crm_token', t); }
+        
         window.onload = function() {
-            refreshData();
+            const token = getAuthToken();
+            if(token) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                refreshData();
+            }
         };
+
+        async function handleLogin() {
+            const t = document.getElementById('authTokenInput').value;
+            if(!t) return;
+            showLoader(true);
+            try {
+                const resp = await fetch(`${API_URL}?action=getAllData&token=${t}`);
+                const res = await resp.json();
+                if(res.error) {
+                    document.getElementById('loginError').classList.remove('hidden');
+                } else {
+                    setAuthToken(t);
+                    fullData = res;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    renderUI();
+                }
+            } catch(e) { alert("Server connectivity error."); }
+            showLoader(false);
+        }
+
+        function handleLogout() {
+            if(confirm("Logout from CRM?")) {
+                sessionStorage.clear();
+                window.location.reload();
+            }
+        }
 
         function formatSheetTime(val) {
             if (!val) return '--';
@@ -190,21 +241,31 @@
         }
 
         async function refreshData() {
+            const token = getAuthToken();
+            if(!token) return;
             showLoader(true);
             try {
-                const resp = await fetch(`${API_URL}?action=getAllData`);
+                const resp = await fetch(`${API_URL}?action=getAllData&token=${token}`);
                 fullData = await resp.json();
+                if(fullData.error) throw new Error(fullData.error);
                 renderUI();
-            } catch (err) { console.error("Sync error:", err); }
+            } catch (err) { 
+                console.error("Sync error:", err); 
+                alert("Session expired or unauthorized. Please re-login.");
+                handleLogout();
+            }
             showLoader(false);
         }
 
         async function syncWebsiteApplications() {
             showLoader(true);
             try {
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncForm' }) });
+                const resp = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'syncForm', token: getAuthToken() }) 
+                });
                 const res = await resp.json();
-                alert(res.message);
+                alert(res.message || "Sync success.");
                 switchTab('Candidates');
                 refreshData();
             } catch (err) { alert("Sync failed."); }
@@ -216,7 +277,10 @@
             const sheetName = sheetMap[currentTab] || (drillDown.type === 'job-candidates' ? 'Candidates' : '');
             if (!sheetName) return;
             try {
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', sheet: sheetName, row: row._ROW, col: colName, value: value }) });
+                await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'updateStatus', sheet: sheetName, row: row._ROW, col: colName, value: value, token: getAuthToken() }) 
+                });
                 refreshData();
             } catch (e) { alert("Update failed."); }
         }
@@ -351,57 +415,40 @@
             return html;
         }
 
-        /**
-         * UPDATED: Enhanced compose with explicit Job Data fetching for Sourced tab
-         */
         async function compose(key, idx) {
             showLoader(true);
             const row = filteredData[idx];
-            
-            // SMART LOOKUP: Find job details from Job Board if sharing JD
             const jobId = row.JOB_ID || '';
             const job = (fullData.jobs || []).find(j => j.JOB_ID === jobId) || {};
 
             try {
-                // FIXED: Enhanced mapping to ensure Job Board fields are pulled correctly
                 const rowData = { 
                     ...row, 
-                    // Job Meta (Pulled from fullData.jobs using JOB_ID)
                     POSITION_TITLE: job.POSITION_TITLE || job.TITLE || row.POSITION_TITLE || row.JOB_TITLE || 'the Position',
                     COMPANY_NAME: job.CLIENT_ID || job.COMPANY || job.CLIENT_NAME || row.COMPANY_NAME || 'Raveone Consultants',
                     LOCATION: job.LOCATION || job.JOB_LOCATION || row.LOCATION || row.CURRENT_LOCATION || 'Bangalore',
-                    
-                    // FIXED: Pulling specific Job Requirements for Sourced tab placeholders
                     EXPERIENCE_REQUIRED: job.EXPERIENCE_REQUIRED || job.MIN_EXPERIENCE || '--',
                     CTC_RANGE: job.CTC_RANGE || job.MIN_SALARY || '--',
-                    
-                    // Candidate Meta (Fallback Logic)
                     CANDIDATE_NAME: row.CANDIDATE_NAME || row.CANDIDATE_SOURCED || 'Candidate',
                     JOB_ID: jobId,
-                    
-                    // Field Alias Mapping for template tags like {{LAST_CTC}}
                     LAST_CTC: row.CURRENT_CTC || row.LAST_CTC || '--',
                     TOTAL_EXP: row.TOTAL_EXPERIENCE || row.TOTAL_EXP || '--',
                     RELEVANT_EXP: row.RELEVANT_EXPERIENCE || row.RELEVANT_EXP || '--',
                     NOTICE: row.NOTICE_PERIOD || row.NOTICE || 'N/A',
                     EXPECTED_CTC: row.EXPECTED_CTC || '--',
-                    
-                    // Links
                     JD_LINK: `https://rajeshkrao1976.github.io/careers/?jobId=${jobId}`,
                     APP_LINK: `Apply using JD Link at https://www.raveone.in/careers`
                 };
 
-                const resp = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData }) });
+                const resp = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'getProcessedMessage', templateKey: key, rowData: rowData, token: getAuthToken() }) 
+                });
                 const res = await resp.json();
                 
                 let rawMessage = res.message || "";
-                
-                // Cleanup 1: Remove redundant Regards
                 let cleanMessage = rawMessage.replace(/Regards,?\s*\n\s*Raveone Consultants\s*/gi, "");
-
-                // Cleanup 2: Hard Override legacy link
                 cleanMessage = cleanMessage.replace(/https:\/\/forms\.gle\/TEn6Ws23TtsdKeyN7/g, "Apply using JD Link at https://www.raveone.in/careers");
-
                 cleanMessage = cleanMessage.trim();
 
                 document.getElementById('modalTitle').innerText = key.replace(/_/g, ' ');
@@ -452,24 +499,19 @@
         function submitInterviewInvite() {
             const dateInput = document.getElementById('intDate').value;
             if(!dateInput) { alert("Please select a date"); return; }
-            
             const dateObj = new Date(dateInput);
             const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
             const timeStr = document.getElementById('intTime').value;
             const mode = document.getElementById('intFormat').value;
             const location = document.getElementById('intLocation').value;
             const row = filteredData[activeRowIdx];
-            
             const candidateName = (row.CANDIDATE_NAME || "Candidate").split(' ')[0];
             const fullName = row.CANDIDATE_NAME || "Candidate";
             const role = row.POSITION_TITLE || row.JOB_TITLE || row.TITLE || "the position";
             const company = row.COMPANY_NAME || row.CLIENT_ID || row.CLIENT_NAME || "Raveone Consultants";
-            
             let subject = "";
             let message = "";
-            
             const signature = "\n\nRegards,\nDr. Rajesh K Rao\nRaveone Consultants\nrajesh@raveone.in  II 9148330565 II";
-
             if (mode === "F2F") {
                 subject = `Interview Invitation: ${role} at ${company}`;
                 message = `Hi ${candidateName},\n\nThank you for your interest in ${company}. We would like to invite you for an in-person interview.\n\nWhen: ${dateStr} at ${timeStr} IST\nWhere: ${location}\n\nPlease confirm your availability.`;
@@ -480,28 +522,21 @@
                 subject = `Video Interview: ${role} / ${fullName}`;
                 message = `Hi ${candidateName},\n\nWe are scheduling a video interview for the ${role} position.\n\nDate: ${dateStr}\nTime: ${timeStr} IST\nLink: ${location}\n\nPlease confirm your availability.`;
             }
-
             message += signature;
             closeModal('interviewModal');
-            
             document.getElementById('modalTitle').innerText = "INTERVIEW INVITE";
             document.getElementById('modalSubtitle').innerText = fullName;
             document.getElementById('emailSubject').innerText = subject;
             document.getElementById('messageBody').value = message;
-            
             const waMsg = `*${subject}*\n\n${message}`;
             const rawPh = (row.PHONE || "").toString().replace(/\D/g, '');
             const phone = rawPh.length === 10 ? '91' + rawPh : rawPh;
-            
             document.getElementById('waActionBtn').onclick = () => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
             document.getElementById('emailActionBtn').onclick = () => window.open(`mailto:${row.EMAIL || ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`, '_blank');
-
             openModal('messageModal');
         }
 
-        function CLIENT_CANDIDATE_SUBMISSION_WA_PROMPT(idx) {
-            compose('CLIENT_CANDIDATE_SUBMISSION_WA', idx);
-        }
+        function CLIENT_CANDIDATE_SUBMISSION_WA_PROMPT(idx) { compose('CLIENT_CANDIDATE_SUBMISSION_WA', idx); }
 
         function handleFilter() { 
             const q = document.getElementById('globalSearch').value.toLowerCase(); 
@@ -515,10 +550,11 @@
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function copyMessage() { document.getElementById('messageBody').select(); document.execCommand('copy'); }
+        
         async function testConnection() {
             showLoader(true);
             try {
-                const resp = await fetch(`${API_URL}?action=getAllData`);
+                const resp = await fetch(`${API_URL}?action=getAllData&token=${getAuthToken()}`);
                 const res = await resp.json();
                 alert(res.error ? `Error: ${res.error}` : "✅ Connected! CRM state synced.");
             } catch (e) { alert("❌ Connection failed."); }
