@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiregrow CRM | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#714B67] h-screen flex items-center justify-center font-['Inter']">
+    <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+        <img src="https://media.licdn.com/dms/image/v2/D560BAQEPjP3aKt0lyg/company-logo_100_100/B56ZU2_QxhHEAU-/0/1740384308771/hiregrow_consultants_logo?e=1771459200&v=beta&t=-T9reydL3xneDymdksgLtMqMz-suxGRgfWCI5gW1v6c" class="h-20 w-20 mx-auto mb-6 rounded-lg shadow-md">
+        <h2 class="font-black text-slate-800 uppercase tracking-tighter text-2xl">Hiregrow CRM</h2>
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.4em] mb-8">Secure Login</p>
+        <div class="space-y-4">
+            <input type="password" id="token" class="w-full p-4 bg-slate-50 border-2 rounded-xl text-center tracking-[0.3em] font-bold outline-none focus:border-[#714B67]" placeholder="ACCESS TOKEN">
+            <button onclick="login()" class="w-full bg-[#714B67] text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-[#5a3c52]">Enter Portal</button>
+        </div>
+        <p id="err" class="text-rose-500 text-[10px] font-bold uppercase mt-4 hidden">Invalid Token</p>
+    </div>
+    <script>
+        function login() {
+            const t = document.getElementById('token').value;
+            if(!t) return;
+            sessionStorage.setItem('crm_token', t);
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
